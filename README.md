@@ -1,7 +1,7 @@
 Heroku buildpack: Static
 ============================
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) which serves files using static nginx.
+This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) which serves static files using nginx.
 
 Usage
 -----
