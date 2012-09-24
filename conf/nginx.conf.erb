@@ -1,0 +1,105 @@
+# Set another default user than root for security reasons
+user       www www;
+
+# As a thumb rule: One per CPU. If you are serving a large amount
+# of static files, which requires blocking disk reads, you may want
+# to increase this from the number of cpu_cores available on your
+# system.
+#
+# The maximum number of connections for Nginx is calculated by:
+# max_clients = worker_processes * worker_connections
+worker_processes 5;
+daemon off;
+
+# Maximum file descriptors that can be opened per process
+# This should be > worker_connections
+worker_rlimit_nofile 8192;
+
+events {
+  # When you need > 8000 * cpu_cores connections, you start optimizing
+  # your OS, and this is probably the point at where you hire people
+  # who are smarter than you, this is *a lot* of requests.
+  worker_connections  8000;
+}
+
+http {
+  # Set the mime-types via the mime.types external file
+  include       mime.types;
+
+  # And the fallback mime-type
+  default_type  application/octet-stream;
+
+  # ~2 seconds is often enough for HTML/CSS, but connections in
+  # Nginx are cheap, so generally it's safe to increase it
+  keepalive_timeout 20;
+
+  sendfile on;
+
+  tcp_nopush on; # off may be better for Comet/long-poll stuff
+  tcp_nodelay off; # on may be better for Comet/long-poll stuff
+
+  # Enable Gzip:
+  gzip on;
+  gzip_http_version 1.0;
+  gzip_comp_level 5;
+  gzip_min_length 512;
+  gzip_buffers 4 8k;
+  gzip_proxied any;
+  gzip_types
+    # text/html is always compressed by HttpGzipModule
+    text/css
+    text/javascript
+    text/xml
+    text/plain
+    text/x-component
+    application/javascript
+    application/x-javascript
+    application/json
+    application/xml
+    application/rss+xml
+    font/truetype
+    font/opentype
+    application/vnd.ms-fontobject
+    image/svg+xml;
+
+  # This should be turned on if you are going to have pre-compressed copies (.gz) of
+  # static files available. If not it should be left off as it will cause extra I/O
+  # for the check. It would be better to enable this in a location {} block for
+  # a specific directory:
+  # gzip_static on;
+
+  gzip_disable        "MSIE [1-6]\.";
+  gzip_vary           on;
+
+  server {
+    listen <%= ENV['PORT'] %>;
+
+    # e.g. "localhost" to accept all connections, or "www.example.com"
+    # to handle the requests for "example.com" (and www.example.com)
+    # server_name www.example.com;
+    server_name      localhost;
+
+    root www;
+
+    charset utf-8;
+
+    expires 1w;
+    add_header Cache-Control "public";
+    # Prevent mobile network providers from modifying your site
+    add_header "Cache-Control" "no-transform";
+    
+    # Cross domain AJAX requests
+    add_header "Access-Control-Allow-Origin" "*";
+
+    # Built-in filename-based cache busting
+
+    # https://github.com/h5bp/html5-boilerplate/blob/5370479476dceae7cc3ea105946536d6bc0ee468/.htaccess#L403
+    # This will route all requests for /css/style.20120716.css to /css/style.css
+    # Read also this: github.com/h5bp/html5-boilerplate/wiki/cachebusting
+    # This is not included by default, because it'd be better if you use the build
+    # script to manage the file names.
+    location ~* (.+)\.(\d+)\.(js|css|png|jpg|jpeg|gif)$ {
+       try_files $uri $1.$3;
+    }
+  }
+}

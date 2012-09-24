@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# bin/release <build-dir>
+
+cat <<EOF
+---
+config_vars:
+  PATH: /usr/local/bin:/usr/bin:/bin
+default_process_types:
+  web: bin/start_nginx
+EOF

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+# fail fast
+set -e
+
+# clean up leaking environment
+unset GIT_DIR
+
+# parse args
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+# init default nginx configuration ----------
+
+if [ -f "${BUILD_DIR}/conf" ]; then
+  echo "-----> Using existing nginx configuration."
+else
+  echo -n "-----> Creating default nginx configuration..."
+  mkdir ${BUILD_DIR}/conf
+  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/mime.types > ${BUILD_DIR}/conf/mime.types
+  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/nginx.conf.erb > ${BUILD_DIR}/conf/nginx.conf.erb
+  echo "done"
+fi
+
+# Nginx -------------------------------------
+
+curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-nginx/master/bin/compile > compile_nginx
+chmod +x compile_nginx
+./compile_nginx $BUILD_DIR $CACHE_DIR
