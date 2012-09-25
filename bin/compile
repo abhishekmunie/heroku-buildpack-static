@@ -21,7 +21,7 @@ function indent() {
 
 # init default nginx configuration ----------
 
-if [ -f "${BUILD_DIR}/conf" ]; then
+if [ -d "${BUILD_DIR}/conf" ]; then
   echo "-----> Using existing nginx configuration."
 else
   echo -n "-----> Creating default nginx configuration..."
