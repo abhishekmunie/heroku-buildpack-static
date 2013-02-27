@@ -1,7 +1,7 @@
 Heroku buildpack: Static
 ============================
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) which serves static files using nginx.
+This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpack) which serves static files using node.js, express or nginx.
 
 Usage
 -----
@@ -9,7 +9,7 @@ Usage
 Example usage:
 
     $ ls -R *
-    _static.yml   		       img.png                    text.txt
+    _static.cfg                img.png                    text.txt
     ...
 
     $ heroku create --stack cedar --buildpack https://github.com/abhishekmunie/heroku-buildpack-static.git
@@ -28,8 +28,15 @@ Example usage:
            Default types for Static -> web
     ...
 
-The buildpack will detect your app as Static if it has the file `_static.yml` in the `root`. At present `_static.yml` doesn't support any configuration.
-You can set custom nginx config as described for [heroku-buildpack-nginx](https://github.com/abhishekmunie/heroku-buildpack-nginx).
+The buildpack will detect your app as Static if it has the file `_static.cfg` in the `root`.
+For nginx, you can set custom nginx config as described for [heroku-buildpack-nginx](https://github.com/abhishekmunie/heroku-buildpack-nginx.
+
+Configuring Buildpack
+---------------------
+
+Buildpack reads its configuration from _static.cfg
+
+    SERVER_TYPE= "node" or "express" or "nginx"
 
 Hacking
 -------
@@ -37,5 +44,5 @@ Hacking
 To modify this buildpack, fork it on Github. Push up changes to your fork, then
 create a test app with `--buildpack <your-github-url>` and push to it.
 
-This buildpack simply creating default nginx configuration for static site
+For Nginx Serve, buildpack simply creating default nginx configuration for static site
 and uses [heroku-buildpack-nginx](https://github.com/abhishekmunie/heroku-buildpack-nginx) to create nginx server.

@@ -4,7 +4,5 @@
 cat <<EOF
 ---
 config_vars:
-  PATH: /usr/local/bin:/usr/bin:/bin
-default_process_types:
-  web: bin/start_nginx
+  PATH: /usr/local/bin:/usr/bin:/bin:bin:node_modules/.bin
 EOF

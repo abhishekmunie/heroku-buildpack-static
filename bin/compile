@@ -19,20 +19,90 @@ function indent() {
   esac
 }
 
-# init default nginx configuration ----------
+source $BUILD_DIR/_staic.cfg
 
-if [ -d "${BUILD_DIR}/conf" ]; then
-  echo "-----> Using existing nginx configuration."
-else
-  echo -n "-----> Creating default nginx configuration..."
-  mkdir ${BUILD_DIR}/conf
-  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/mime.types > ${BUILD_DIR}/conf/mime.types
-  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/nginx.conf.erb > ${BUILD_DIR}/conf/nginx.conf.erb
-  echo "done"
+if [[ ! $SERVER_TYPE ]]; then
+  SERVER_TYPE="node"
 fi
 
-# Nginx -------------------------------------
+if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
 
-curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-nginx/master/bin/compile > compile_nginx
-chmod +x compile_nginx
-./compile_nginx $BUILD_DIR $CACHE_DIR
+  BUILD_DIR=$(mktemp -d -t node.XXXXXX)
+
+  if [ -f $BUILD_DIR/package.json ]; then
+    echo "-----> Using existiong package.json"
+  else
+    echo -n "-----> Creating package.json for node... "
+    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static-node/master/conf/package.json > $BUILD_DIR/package.json
+    echo "done"
+  fi
+
+  if [ ! -f $BUILD_DIR/server.coffee ]; then
+    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static-node/master/conf/server.coffee > $BUILD_DIR/sever.coffee
+  fi
+
+  if [ -d ${BUILD_DIR}/lib ]; then
+    mkdir ${BUILD_DIR}/lib
+  fi
+  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static-node/master/conf/lib/StreamCache.coffee > $BUILD_DIR/lib/StreamCache.coffee
+
+  if [[ ! -f $BUILD_DIR/Procfile ]]; then
+    echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
+    chmod +x $BUILD_DIR/Procfile
+  fi
+
+  curl --silent --location https://raw.github.com/heroku/heroku-buildpack-nodejs/master/bin/compile > compile_node
+  chmod +x compile_node
+  ./compile_node $BUILD_DIR $CACHE_DIR
+
+elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
+
+  BUILD_DIR=$(mktemp -d -t node.XXXXXX)
+
+  if [ -f $BUILD_DIR/package.json ]; then
+    echo "-----> Using existiong package.json"
+  else
+    echo -n "-----> Creating package.json for express... "
+    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static-node/master/conf/package-express.json > $BUILD_DIR/package.json
+    echo "done"
+  fi
+
+  if [ ! -f $BUILD_DIR/server.coffee ]; then
+    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static-node/master/conf/express.coffee > $BUILD_DIR/sever.coffee
+  fi
+
+  if [ -d ${BUILD_DIR}/lib ]; then
+    mkdir ${BUILD_DIR}/lib
+  fi
+  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static-node/master/conf/lib/StreamCache.coffee > $BUILD_DIR/lib/StreamCache.coffee
+
+  if [[ ! -f $BUILD_DIR/Procfile ]]; then
+    echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
+    chmod +x $BUILD_DIR/Procfile
+  fi
+
+  curl --silent --location https://raw.github.com/heroku/heroku-buildpack-nodejs/master/bin/compile > compile_node
+  chmod +x compile_node
+  ./compile_node $BUILD_DIR $CACHE_DIR
+
+elif [[ $SERVER_TYPE == "nginx" ]]; then
+
+  # init default nginx configuration ----------
+
+  if [ -d "${BUILD_DIR}/conf" ]; then
+    echo "-----> Using existing nginx configuration."
+  else
+    echo -n "-----> Creating default nginx configuration... "
+    mkdir ${BUILD_DIR}/conf
+    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/mime.types > ${BUILD_DIR}/conf/mime.types
+    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/nginx.conf.erb > ${BUILD_DIR}/conf/nginx.conf.erb
+    echo "done"
+  fi
+
+  # Nginx -------------------------------------
+
+  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-nginx/master/bin/compile > compile_nginx
+  chmod +x compile_nginx
+  ./compile_nginx $BUILD_DIR $CACHE_DIR
+
+fi
