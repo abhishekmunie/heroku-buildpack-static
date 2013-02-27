@@ -41,9 +41,11 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
     curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/server.coffee > $BUILD_DIR/sever.coffee
   fi
 
-  if [ -d ${BUILD_DIR}/lib ]; then
+  if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
+  ls -R $BUILD_DIR
+  touch $BUILD_DIR/lib/StreamCache.coffee
   curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/lib/StreamCache.coffee > $BUILD_DIR/lib/StreamCache.coffee
 
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
@@ -71,7 +73,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
     curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/express.coffee > $BUILD_DIR/sever.coffee
   fi
 
-  if [ -d ${BUILD_DIR}/lib ]; then
+  if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
   curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/lib/StreamCache.coffee > $BUILD_DIR/lib/StreamCache.coffee
