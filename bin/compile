@@ -19,7 +19,7 @@ function indent() {
   esac
 }
 
-source $BUILD_DIR/_staic.cfg
+source $BUILD_DIR/_static.cfg
 
 if [[ ! $SERVER_TYPE ]]; then
   SERVER_TYPE="node"
