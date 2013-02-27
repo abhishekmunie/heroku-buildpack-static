@@ -23,8 +23,7 @@
   "main": "server.js",
   "dependencies": {
     "coffee-script" : "latest",
-    "express"       : "latest",
-    "nodefly"       : "stable"
+    "express"       : "latest"
   },
   "scripts": {
     "start": "server.js"
