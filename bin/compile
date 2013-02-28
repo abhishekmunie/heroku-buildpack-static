@@ -48,7 +48,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  mv -R $LP_DIR/vendor/lib/* $BUILD_DIR/lib
+  mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
   echo "done"
 
   echo "-----> Creating Procfile... "
@@ -61,7 +61,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
   echo "-----> Initiating Node.js Buildpack... "
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv -R $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
+  mv -f $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
   $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
   echo "       done."
@@ -89,7 +89,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  mv -R $LP_DIR/vendor/lib/* $BUILD_DIR/lib
+  mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
   echo "done"
 
   echo "-----> Creating Procfile... "
@@ -102,7 +102,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
   echo "-----> Initiating Node.js Buildpack... "
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv -R $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
+  mv -f $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
   $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
   echo "       done."
