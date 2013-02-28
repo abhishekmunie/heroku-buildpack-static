@@ -46,7 +46,7 @@ createServer = ->
   console.log "Number of files cached: #{files_cached}"
   console.timeEnd 'Caching Files'
   console.time 'Starting Server'
-  C404 = fileCache['/404.html']
+  C404 = fileCache['/404.html'] or fileCache['/404.htm']
 
   app = express()
 
