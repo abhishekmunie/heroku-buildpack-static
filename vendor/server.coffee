@@ -172,7 +172,7 @@ walk = (dir, error, onFile, end) ->
     l = list.length
     return end() if l == 0
     for file in list
-      if file == 'Icon\r' or /(^|\/)\./.test(file) or /\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist|tmp)|~/.test(file)
+      if file == 'Icon\r' or /(^|\/)\./.test(file) or /\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist|tmp|node_modules|bin)|~/.test(file)
         l--
         continue
       ((fn) ->
