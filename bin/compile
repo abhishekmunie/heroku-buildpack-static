@@ -105,8 +105,8 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
 
   # Nginx -------------------------------------
 
-  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-nginx/master/bin/compile > compile_nginx
-  chmod +x compile_nginx
-  ./compile_nginx $BUILD_DIR $CACHE_DIR
+  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-nginx/master/bin/compile > $LP_DIR/bin/compile_nginx
+  chmod +x $LP_DIR/bin/compile_nginx
+  $LP_DIR/bin/compile_nginx $BUILD_DIR $CACHE_DIR
 
 fi
