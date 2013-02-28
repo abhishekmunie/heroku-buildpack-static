@@ -32,18 +32,18 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
     echo "-----> Using existiong package.json"
   else
     echo -n "-----> Creating package.json for node... "
-    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/package.json > $BUILD_DIR/package.json
+    mv $LP_DIR/conf/package.json  $BUILD_DIR/package.json
     echo "done"
   fi
 
   if [ ! -f $BUILD_DIR/server.coffee ]; then
-    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/server.coffee > $BUILD_DIR/sever.coffee
+    mv $LP_DIR/conf/server.coffee $BUILD_DIR/server.coffee
   fi
 
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/lib/StreamCache.coffee > $BUILD_DIR/lib/StreamCache.coffee
+  mv $LP_DIR/conf/lib/StreamCache.coffee > $BUILD_DIR/lib/StreamCache.coffee
 
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
@@ -62,18 +62,19 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
     echo "-----> Using existiong package.json"
   else
     echo -n "-----> Creating package.json for express... "
-    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/package-express.json > $BUILD_DIR/package.json
+    mv $LP_DIR/conf/package-express.json $BUILD_DIR/package.json
     echo "done"
   fi
 
   if [ ! -f $BUILD_DIR/server.coffee ]; then
-    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/express.coffee > $BUILD_DIR/sever.coffee
+
+    mv $LP_DIR/conf/express.coffee $BUILD_DIR/server.coffee
   fi
 
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/lib/StreamCache.coffee > $BUILD_DIR/lib/StreamCache.coffee
+  mv $LP_DIR/conf/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
 
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
@@ -94,9 +95,11 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
     echo "-----> Using existing nginx configuration."
   else
     echo -n "-----> Creating default nginx configuration... "
-    mkdir ${BUILD_DIR}/conf
-    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/mime.types > ${BUILD_DIR}/conf/mime.types
-    curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-static/master/conf/nginx.conf.erb > ${BUILD_DIR}/conf/nginx.conf.erb
+    if [[ ! -d ${BUILD_DIR}/conf ]]; then
+      mkdir ${BUILD_DIR}/conf
+    fi
+    mv $LP_DIR/conf/mime.types ${BUILD_DIR}/conf/mime.types
+    mv $LP_DIR/conf/nginx.conf.erb ${BUILD_DIR}/conf/nginx.conf.erb
     echo "done"
   fi
 
