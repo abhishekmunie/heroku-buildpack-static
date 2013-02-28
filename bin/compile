@@ -44,7 +44,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
     echo "done"
   fi
 
-  echo -n "-----> Coping lib files... "
+  echo -n "-----> Copying lib files... "
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
@@ -85,7 +85,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
     echo "done"
   fi
 
-  echo -n "-----> Coping lib files... "
+  echo -n "-----> Copying lib files... "
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
