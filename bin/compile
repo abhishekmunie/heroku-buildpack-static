@@ -20,6 +20,7 @@ function indent() {
 }
 
 source $BUILD_DIR/_static.cfg
+
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
 if [[ ! $SERVER_TYPE ]]; then
