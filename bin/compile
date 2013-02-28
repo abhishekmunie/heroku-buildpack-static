@@ -36,25 +36,35 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
     echo "done"
   fi
 
-  if [ ! -f $BUILD_DIR/server.coffee ]; then
+  if [ -f $BUILD_DIR/server.coffee ]; then
+    echo "-----> Using existiong server.coffee"
+  else
+    echo -n "-----> Creating server.coffee for node... "
     mv $LP_DIR/vendor/server.coffee $BUILD_DIR/server.coffee
+    echo "done"
   fi
 
+  echo -n "-----> Coping lib files... "
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  mv $LP_DIR/vendor/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
+  mv -R $LP_DIR/vendor/lib/* $BUILD_DIR/lib
+  echo "done"
 
+  echo "-----> Creating Procfile... "
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
   fi
+  echo "done"
 
+  echo "-----> Initiating Node.js Buildpack... "
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
-  git clone https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
+  git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
   mv -R $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
-  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR
+  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
+  echo "       done."
   rm -f $NODE_BUILDPACK_DIR
 
 elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
@@ -67,26 +77,35 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
     echo "done"
   fi
 
-  if [ ! -f $BUILD_DIR/server.coffee ]; then
-
+  if [ -f $BUILD_DIR/server.coffee ]; then
+    echo "-----> Using existiong server.coffee"
+  else
+    echo -n "-----> Creating server.coffee for express... "
     mv $LP_DIR/vendor/express.coffee $BUILD_DIR/server.coffee
+    echo "done"
   fi
 
+  echo -n "-----> Coping lib files... "
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  mv $LP_DIR/vendor/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
+  mv -R $LP_DIR/vendor/lib/* $BUILD_DIR/lib
+  echo "done"
 
+  echo "-----> Creating Procfile... "
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
   fi
+  echo "done"
 
+  echo "-----> Initiating Node.js Buildpack... "
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
-  git clone https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
+  git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
   mv -R $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
-  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR
+  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
+  echo "       done."
   rm -f $NODE_BUILDPACK_DIR
 
 elif [[ $SERVER_TYPE == "nginx" ]]; then
