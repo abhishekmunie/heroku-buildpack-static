@@ -23,7 +23,7 @@ source $BUILD_DIR/_static.cfg
 
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
-if [[ ! -f $BUILD_DIR/404.html ]]; then
+if [[ ! -f $BUILD_DIR/404.html && ! -f $BUILD_DIR/404.htm ]]; then
   echo -n "-----> Creating default 404 page... "
   mv $LP_DIR/vendor/404.html  $BUILD_DIR/404.html
   echo "done"
