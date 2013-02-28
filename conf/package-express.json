@@ -20,7 +20,7 @@
     "node"        : ">=0.8.15",
     "npm"         : ">=1.1.39"
   },
-  "main": "server.js",
+  "main": "server.coffee",
   "dependencies": {
     "coffee-script" : "latest",
     "express"       : "latest"
