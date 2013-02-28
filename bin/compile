@@ -32,18 +32,18 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
     echo "-----> Using existiong package.json"
   else
     echo -n "-----> Creating package.json for node... "
-    mv $LP_DIR/conf/package.json  $BUILD_DIR/package.json
+    mv $LP_DIR/vendor/package.json  $BUILD_DIR/package.json
     echo "done"
   fi
 
   if [ ! -f $BUILD_DIR/server.coffee ]; then
-    mv $LP_DIR/conf/server.coffee $BUILD_DIR/server.coffee
+    mv $LP_DIR/vendor/server.coffee $BUILD_DIR/server.coffee
   fi
 
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  mv $LP_DIR/conf/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
+  mv $LP_DIR/vendor/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
 
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
@@ -52,7 +52,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
 
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv $NODE_BUILDPACK_DIR/vendor $LP_DIR
+  mv -R $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
   $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR
 
@@ -62,19 +62,19 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
     echo "-----> Using existiong package.json"
   else
     echo -n "-----> Creating package.json for express... "
-    mv $LP_DIR/conf/package-express.json $BUILD_DIR/package.json
+    mv $LP_DIR/vendor/package-express.json $BUILD_DIR/package.json
     echo "done"
   fi
 
   if [ ! -f $BUILD_DIR/server.coffee ]; then
 
-    mv $LP_DIR/conf/express.coffee $BUILD_DIR/server.coffee
+    mv $LP_DIR/vendor/express.coffee $BUILD_DIR/server.coffee
   fi
 
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
-  mv $LP_DIR/conf/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
+  mv $LP_DIR/vendor/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
 
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
@@ -83,7 +83,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
 
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv $NODE_BUILDPACK_DIR/vendor $LP_DIR
+  mv -R $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
   $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR
 
@@ -98,8 +98,8 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
     if [[ ! -d ${BUILD_DIR}/conf ]]; then
       mkdir ${BUILD_DIR}/conf
     fi
-    mv $LP_DIR/conf/mime.types ${BUILD_DIR}/conf/mime.types
-    mv $LP_DIR/conf/nginx.conf.erb ${BUILD_DIR}/conf/nginx.conf.erb
+    mv $LP_DIR/vendor/mime.types ${BUILD_DIR}/vendor/mime.types
+    mv $LP_DIR/vendor/nginx.conf.erb ${BUILD_DIR}/vendor/nginx.conf.erb
     echo "done"
   fi
 
