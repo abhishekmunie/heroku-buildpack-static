@@ -46,7 +46,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
   mv $LP_DIR/vendor/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
 
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
-    echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
+    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
   fi
 
@@ -78,7 +78,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
   mv $LP_DIR/vendor/lib/StreamCache.coffee $BUILD_DIR/lib/StreamCache.coffee
 
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
-    echo "web: exec env NODE_PATH="$(dirname $(dirname $0))/lib" coffee server.coffee" > $BUILD_DIR/Procfile
+    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
   fi
 
