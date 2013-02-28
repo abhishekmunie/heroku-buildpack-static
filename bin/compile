@@ -20,14 +20,13 @@ function indent() {
 }
 
 source $BUILD_DIR/_static.cfg
+LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
 if [[ ! $SERVER_TYPE ]]; then
   SERVER_TYPE="node"
 fi
 
 if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
-
-  BUILD_DIR=$(mktemp -d -t node.XXXXXX)
 
   if [ -f $BUILD_DIR/package.json ]; then
     echo "-----> Using existiong package.json"
@@ -51,13 +50,13 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
     chmod +x $BUILD_DIR/Procfile
   fi
 
-  curl --silent --location https://raw.github.com/heroku/heroku-buildpack-nodejs/master/bin/compile > compile_node
-  chmod +x compile_node
-  ./compile_node $BUILD_DIR $CACHE_DIR
+  NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
+  git clone https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
+  mv $NODE_BUILDPACK_DIR/vendor $LP_DIR
+  mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
+  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR
 
 elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
-
-  BUILD_DIR=$(mktemp -d -t node.XXXXXX)
 
   if [ -f $BUILD_DIR/package.json ]; then
     echo "-----> Using existiong package.json"
@@ -81,9 +80,11 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
     chmod +x $BUILD_DIR/Procfile
   fi
 
-  curl --silent --location https://raw.github.com/heroku/heroku-buildpack-nodejs/master/bin/compile > compile_node
-  chmod +x compile_node
-  ./compile_node $BUILD_DIR $CACHE_DIR
+  NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
+  git clone https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
+  mv $NODE_BUILDPACK_DIR/vendor $LP_DIR
+  mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
+  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR
 
 elif [[ $SERVER_TYPE == "nginx" ]]; then
 
