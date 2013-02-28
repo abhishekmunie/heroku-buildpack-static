@@ -65,7 +65,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
   $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
   echo "       done."
-  rm -f $NODE_BUILDPACK_DIR
+  rm -fr $NODE_BUILDPACK_DIR
 
 elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
 
@@ -106,7 +106,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
   mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
   $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
   echo "       done."
-  rm -f $NODE_BUILDPACK_DIR
+  rm -fr $NODE_BUILDPACK_DIR
 
 elif [[ $SERVER_TYPE == "nginx" ]]; then
 
