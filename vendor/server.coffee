@@ -17,7 +17,7 @@ generateFileCache = (file) ->
     srcgz.once 'end', ->
       data = if gzipped = data_gzipped.getLength() < 0.85*data_raw.getLength() then data_gzipped else data_raw
       etag = data.hash()
-      fileCache[('/' + path.relative _STATIC_DIR, file).split('index.html')[0].split('index.htm')[0]] =
+      fileCache[path.join('/', path.relative _STATIC_DIR, file).split('index.html')[0].split('index.htm')[0]] =
         data: data
         gzipped: gzipped
         etag: etag
@@ -185,7 +185,7 @@ walk = (dir, error, onFile, end) ->
             end() if --l == 0
       )(dir + '/' + file)
 
-walk path.relative(_STATIC_DIR, __dirname) || '.', (err) ->
+walk _STATIC_DIR || '.', (err) ->
   console.error err
 , (file) ->
   process.nextTick -> generateFileCache file
