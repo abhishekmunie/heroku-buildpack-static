@@ -26,9 +26,8 @@ module.exports = class StreamCache extends Stream
 
     if @_ended
       dest.end()
-      return dest
-
-    @_dests.push dest
+    else
+      @_dests.push dest
     dest
 
   getLength: ->

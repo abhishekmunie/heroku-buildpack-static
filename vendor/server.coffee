@@ -48,8 +48,6 @@ createServer = ->
   C404 = fileCache['/404.html'] or fileCache['/404.htm']
 
   app = http.createServer (req, res) ->
-    reql = "Req: #{req.url}"
-    console.time reql
     req.url = req.url.replace(/^(.+)\.(\d+)\.(js|css|png|jpg|gif)$/, '$1.$3');
     uri = url.parse(req.url).pathname
 
@@ -99,10 +97,6 @@ createServer = ->
         'ETag'                        : cache.etag
 
     try
-      cache.data.once 'end', ->
-        console.log 'hi'
-        res.end()
-        console.timeEnd reql
       cache.data.pipe res
     catch e
       res.end "Request: " + req.url + "\nOops! node toppled while getting: " + url.parse(req.url).pathname
