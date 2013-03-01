@@ -21,6 +21,7 @@ Example usage:
     -----> Fetching custom buildpack... cloning with git...done
     -----> Static app detected
     -----> Creating default 404 page... done
+    ...
     -----> Discovering process types
     ...
 
