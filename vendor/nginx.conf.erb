@@ -8,7 +8,7 @@ user       www www;
 #
 # The maximum number of connections for Nginx is calculated by:
 # max_clients = worker_processes * worker_connections
-worker_processes 5;
+worker_processes 3;
 daemon off;
 
 # Maximum file descriptors that can be opened per process
@@ -29,6 +29,9 @@ http {
   # And the fallback mime-type
   default_type  application/octet-stream;
 
+  # Hide nginx version
+  server_tokens off;
+
   # ~2 seconds is often enough for HTML/CSS, but connections in
   # Nginx are cheap, so generally it's safe to increase it
   keepalive_timeout 20;
@@ -48,19 +51,17 @@ http {
   gzip_types
     # text/html is always compressed by HttpGzipModule
     text/css
-    text/javascript
-    text/xml
     text/plain
     text/x-component
     application/javascript
-    application/x-javascript
     application/json
     application/xml
-    application/rss+xml
-    font/truetype
-    font/opentype
+    application/xhtml+xml
+    application/x-font-ttf
+    application/x-font-opentype
     application/vnd.ms-fontobject
-    image/svg+xml;
+    image/svg+xml
+    image/x-icon;
 
   # This should be turned on if you are going to have pre-compressed copies (.gz) of
   # static files available. If not it should be left off as it will cause extra I/O
@@ -68,28 +69,25 @@ http {
   # a specific directory:
   # gzip_static on;
 
-  gzip_disable        "MSIE [1-6]\.";
-  gzip_vary           on;
+  gzip_disable "msie6";
+  gzip_vary on;
 
   server {
     listen <%= ENV['PORT'] %>;
 
-    # e.g. "localhost" to accept all connections, or "www.example.com"
-    # to handle the requests for "example.com" (and www.example.com)
-    # server_name www.example.com;
+    # The host name to respond to
     server_name      localhost;
 
+    # Path for static files
     root .;
 
+    #Specify a charset
     charset utf-8;
 
-    expires 1w;
-    add_header Cache-Control "public";
-    # Prevent mobile network providers from modifying your site
-    add_header "Cache-Control" "no-transform";
-    
-    # Cross domain AJAX requests
-    add_header "Access-Control-Allow-Origin" "*";
+    # Custom 404 page
+    error_page 404 /404.html;
+
+    # Expire rules for static content
 
     # Built-in filename-based cache busting
 
@@ -101,5 +99,78 @@ http {
     location ~* (.+)\.(\d+)\.(js|css|png|jpg|jpeg|gif)$ {
        try_files $uri $1.$3;
     }
+
+    # No default expire rule. This config mirrors that of apache as outlined in the
+    # html5-boilerplate .htaccess file. However, nginx applies rules by location,
+    # the apache rules are defined by type. A concequence of this difference is that
+    # if you use no file extension in the url and serve html, with apache you get an
+    # expire time of 0s, with nginx you'd get an expire header of one month in the
+    # future (if the default expire rule is 1 month). Therefore, do not use a
+    # default expire rule with nginx unless your site is completely static
+
+    # cache.appcache, your document html and data
+    location ~* \.(?:manifest|appcache|html|xml|json)$ {
+      expires -1;
+      access_log logs/static.log;
+    }
+
+    # Feed
+    location ~* \.(?:rss|atom)$ {
+      expires 1h;
+      add_header Cache-Control "public";
+    }
+
+    # Favicon
+    location ~* \.ico$ {
+      expires 1w;
+      access_log off;
+      add_header Cache-Control "public";
+    }
+
+    # Media: images, video, audio, HTC
+    location ~* \.(?:jpg|jpeg|gif|png|ico|gz|svg|svgz|mp4|ogg|ogv|webm)$ {
+      expires 1M;
+      access_log off;
+      add_header Cache-Control "public";
+    }
+
+    # CSS and Javascript
+    location ~* \.(?:css|js)$ {
+      expires 1y;
+      access_log off;
+      add_header Cache-Control "public";
+    }
+
+    # Cross domain webfont access
+    location ~* \.(ttf|ttc|otf|eot|woff|font.css)$ {
+        add_header "Access-Control-Allow-Origin" "*";
+
+        # Also, set cache rules for webfonts.
+        #
+        # See http://wiki.nginx.org/HttpCoreModule#location
+        # And https://github.com/h5bp/server-configs/issues/85
+        # And https://github.com/h5bp/server-configs/issues/86
+        expires 1M;
+        access_log off;
+        add_header Cache-Control "public";
+    }
+
+    # Force the latest IE version
+    # Use ChromeFrame if it's installed for a better experience for the poor IE folk
+    add_header "X-UA-Compatible" "IE=Edge,chrome=1";
+
+    # Prevent clients from accessing hidden files (starting with a dot)
+    location ~* (^|/)\. {
+        return 403;
+    }
+
+    # Prevent clients from accessing to backup/config/source files
+    location ~* (\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$ {
+        return 403;
+    }
+
+    # Prevent mobile network providers from modifying your site
+    add_header "Cache-Control" "no-transform";
+
   }
 }

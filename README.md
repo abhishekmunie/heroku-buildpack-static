@@ -34,7 +34,7 @@ For nginx, you can set custom nginx config as described for [heroku-buildpack-ng
 Configuring Buildpack
 ---------------------
 
-Buildpack reads its configuration from _static.cfg
+Buildpack reads its configuration from `_static.cfg`
 
     SERVER_TYPE= "node" or "express" or "nginx"
 
