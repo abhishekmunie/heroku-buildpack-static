@@ -126,15 +126,20 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
     if [[ ! -d ${BUILD_DIR}/conf ]]; then
       mkdir ${BUILD_DIR}/conf
     fi
-    mv $LP_DIR/vendor/mime.types ${BUILD_DIR}/vendor/mime.types
-    mv $LP_DIR/vendor/nginx.conf.erb ${BUILD_DIR}/vendor/nginx.conf.erb
+    mv $LP_DIR/vendor/mime.types ${BUILD_DIR}/conf/mime.types
+    mv $LP_DIR/vendor/nginx.conf.erb ${BUILD_DIR}/conf/nginx.conf.erb
     echo "done"
   fi
 
   # Nginx -------------------------------------
 
-  curl --silent --location https://raw.github.com/abhishekmunie/heroku-buildpack-nginx/master/bin/compile > $LP_DIR/bin/compile_nginx
-  chmod +x $LP_DIR/bin/compile_nginx
-  $LP_DIR/bin/compile_nginx $BUILD_DIR $CACHE_DIR
+  echo "-----> Initiating Nginx Buildpack... "
+  NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
+  git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NGINX_BUILDPACK_DIR
+  mv -f $NGINX_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
+  mv $NGINX_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_nginx
+  $LP_DIR/bin/compile_nginx $BUILD_DIR $CACHE_DIR | indent
+  echo "       done."
+  rm -fr $NGINX_BUILDPACK_DIR
 
 fi
