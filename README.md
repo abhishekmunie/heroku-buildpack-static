@@ -20,12 +20,8 @@ Example usage:
     -----> Heroku receiving push
     -----> Fetching custom buildpack... cloning with git...done
     -----> Static app detected
-    -----> Creating default nginx configuration...done
-    -----> Fetching nginx binaries
-    -----> Vendoring nginx 1.0.14
+    -----> Creating default 404 page... done
     -----> Discovering process types
-           Procfile declares types      -> (none)
-           Default types for Static -> web
     ...
 
 The buildpack will detect your app as Static if it has the file `_static.cfg` in the `root`.
