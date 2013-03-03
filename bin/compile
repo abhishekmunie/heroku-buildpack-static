@@ -135,7 +135,7 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
 
   echo "-----> Initiating Nginx Buildpack... "
   NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
-  git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NGINX_BUILDPACK_DIR
+  git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $NGINX_BUILDPACK_DIR
   mv -f $NGINX_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
   mv $NGINX_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_nginx
   $LP_DIR/bin/compile_nginx $BUILD_DIR $CACHE_DIR | indent
