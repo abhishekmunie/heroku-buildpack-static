@@ -51,12 +51,12 @@ createServer = ->
   app = express()
 
   app.configure () ->
-    if process.env.FORCE_HTTPS_HOST
+    if process.env.FORCE_HTTPS_HOST?
       app.use (req, res, next) ->
         if req.headers['x-forwarded-proto'] == 'https' or req.secure
           next()
         else
-          res.redirect 301, process.env.FORCE_HTTPS_HOST + req.path
+          res.redirect 301, (process.env.FORCE_HTTPS_HOST || req.headers.host) + req.path
     app.use express.favicon()
     app.use express.cookieParser process.env.COOKIE_SECRET if process.env.COOKIE_SECRET
     app.use express.bodyParser()
@@ -67,7 +67,7 @@ createServer = ->
     uri = url.parse(req.url).pathname
     # Rewrite "www.example.com -> example.com".
     host = req.headers.host
-    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + url if false is options.www and RE_WWW.test host
+    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + url if RE_WWW.test host
 
     res.removeHeader 'X-Powered-By'
     res.removeHeader 'Last-Modified'

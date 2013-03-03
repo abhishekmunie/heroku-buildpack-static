@@ -27,6 +27,5 @@
   },
   "scripts": {
     "start": "server.js"
-  },
-  "subdomain": "s"
+  }
 }

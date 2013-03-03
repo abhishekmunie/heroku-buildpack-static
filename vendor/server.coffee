@@ -49,10 +49,11 @@ createServer = ->
 
   app = http.createServer (req, res) ->
     req.url = req.url.replace /^(.+)\.(\d+)\.(js|css|png|jpg|gif)$/, '$1.$3'
-    uri = url.parse(req.url).pathname
+    [uri, query] = req.url.split '?'
+    uri = url.parse(uri).pathname
     # Rewrite "www.example.com -> example.com".
     host = req.headers.host
-    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + url if false is options.www and RE_WWW.test host
+    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + url if RE_WWW.test host
 
     res.removeHeader 'X-Powered-By'
     res.removeHeader 'Last-Modified'
