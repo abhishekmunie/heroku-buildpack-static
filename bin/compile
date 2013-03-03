@@ -23,6 +23,19 @@ source $BUILD_DIR/_static.cfg
 
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
+if [[ $BUILD_WEB_ASSETS ]]; then
+
+  echo "-----> Building Web Assets... "
+  WEBASSETS_BUILDPACK_DIR=$(mktemp -d -t webassets.XXXXXX)
+  git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-webassets.git $WEBASSETS_BUILDPACK_DIR
+  mv -f $WEBASSETS_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
+  mv $WEBASSETS_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_webassets
+  $LP_DIR/bin/compile_webassets $BUILD_DIR $CACHE_DIR | indent
+  echo "       done."
+  rm -fr $WEBASSETS_BUILDPACK_DIR
+
+fi
+
 if [[ ! -f $BUILD_DIR/404.html && ! -f $BUILD_DIR/404.htm ]]; then
   echo -n "-----> Creating default 404 page... "
   mv $LP_DIR/vendor/404.html  $BUILD_DIR/404.html
