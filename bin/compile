@@ -23,8 +23,7 @@ source $BUILD_DIR/_static.cfg
 
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
-if [[ $BUILD_WEB_ASSETS ]]; then
-
+if [[ $BUILD_WEB_ASSETS && -f $BUILD_DIR/_webassets.cfg ]]; then
   echo "-----> Building Web Assets... "
   WEBASSETS_BUILDPACK_DIR=$(mktemp -d -t webassets.XXXXXX)
   git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-webassets.git $WEBASSETS_BUILDPACK_DIR
@@ -33,11 +32,10 @@ if [[ $BUILD_WEB_ASSETS ]]; then
   $LP_DIR/bin/compile_webassets $BUILD_DIR $CACHE_DIR | indent
   echo "       done."
   rm -fr $WEBASSETS_BUILDPACK_DIR
-
 fi
 
 if [[ ! -f $BUILD_DIR/404.html && ! -f $BUILD_DIR/404.htm ]]; then
-  echo -n "-----> Creating default 404 page... "
+  echo -n "-----> Vendoring default 404.html into slug... "
   mv $LP_DIR/vendor/404.html  $BUILD_DIR/404.html
   echo "done"
 fi
@@ -51,7 +49,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
   if [ -f $BUILD_DIR/package.json ]; then
     echo "-----> Using existiong package.json"
   else
-    echo -n "-----> Creating package.json for node... "
+    echo -n "-----> Vendoring package.json for node into slug... "
     mv $LP_DIR/vendor/package.json  $BUILD_DIR/package.json
     echo "done"
   fi
@@ -59,19 +57,19 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
   if [ -f $BUILD_DIR/server.coffee ]; then
     echo "-----> Using existiong server.coffee"
   else
-    echo -n "-----> Creating server.coffee for node... "
+    echo -n "-----> Vendoring server.coffee for node into slug... "
     mv $LP_DIR/vendor/server.coffee $BUILD_DIR/server.coffee
     echo "done"
   fi
 
-  echo -n "-----> Copying lib files... "
+  echo -n "-----> Vendoring lib files into slug... "
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
   mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
   echo "done"
 
-  echo "-----> Creating Procfile... "
+  echo "-----> Vendoring Procfile into slug... "
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
@@ -92,7 +90,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
   if [ -f $BUILD_DIR/package.json ]; then
     echo "-----> Using existiong package.json"
   else
-    echo -n "-----> Creating package.json for express... "
+    echo -n "-----> Vendoring package.json for express into slug... "
     mv $LP_DIR/vendor/package-express.json $BUILD_DIR/package.json
     echo "done"
   fi
@@ -100,19 +98,19 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
   if [ -f $BUILD_DIR/server.coffee ]; then
     echo "-----> Using existiong server.coffee"
   else
-    echo -n "-----> Creating server.coffee for express... "
+    echo -n "-----> Vendoring server.coffee for express into slug... "
     mv $LP_DIR/vendor/express.coffee $BUILD_DIR/server.coffee
     echo "done"
   fi
 
-  echo -n "-----> Copying lib files... "
+  echo -n "-----> Vendoring lib files into slug... "
   if [ ! -d ${BUILD_DIR}/lib ]; then
     mkdir ${BUILD_DIR}/lib
   fi
   mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
   echo "done"
 
-  echo "-----> Creating Procfile... "
+  echo "-----> Vendoring Procfile into slug... "
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
@@ -135,7 +133,7 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
   if [ -d "${BUILD_DIR}/conf" ]; then
     echo "-----> Using existing nginx configuration."
   else
-    echo -n "-----> Creating default nginx configuration... "
+    echo -n "-----> Vendoring default nginx configuration into slug... "
     if [[ ! -d ${BUILD_DIR}/conf ]]; then
       mkdir ${BUILD_DIR}/conf
     fi
