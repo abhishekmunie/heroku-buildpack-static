@@ -78,6 +78,9 @@ createServer = ->
       res.type type
       res.set 'content-encoding', 'gzip' if cache.gzipped
       res.set 'X-UA-Compatible', 'IE=Edge,chrome=1' if req.headers['user-agent'].indexOf('MSIE') > -1 && /html?($|\?|#)/.test url
+      if type is 'js'
+        mapurl = fileCache[url+".map"] ? url.match(/.*[\.\/]/) + "map"
+        res.setHeader 'X-SourceMap', mapurl if fileCache[mapurl]
       res.set
         'Transfer-Encoding'           : 'chunked'
         'Vary'                        : 'Accept-Encoding'
