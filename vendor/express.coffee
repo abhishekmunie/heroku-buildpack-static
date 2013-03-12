@@ -41,6 +41,7 @@ ONE_HOUR = 60 * 60
 ONE_WEEK = ONE_HOUR * 24 * 7
 ONE_MONTH = ONE_WEEK * 4
 ONE_YEAR = ONE_MONTH * 12
+RE_WWW = /^www\./
 
 createServer = ->
   console.log "Number of files cached: #{files_cached}"
@@ -63,11 +64,11 @@ createServer = ->
     app.use express.session secret: process.env.SESSION_SECRET if process.env.SESSION_SECRET
 
   app.get '*', (req, res) ->
+    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + req.url if process.env.RE_WWW_CHECK and RE_WWW.test host
     req.url = req.url.replace /^(.+)\.(\d+)\.(js|css|png|jpg|gif)$/, '$1.$3'
     uri = url.parse(req.url).pathname
     # Rewrite "www.example.com -> example.com".
     host = req.headers.host
-    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + url if RE_WWW.test host
 
     res.removeHeader 'X-Powered-By'
     res.removeHeader 'Last-Modified'
@@ -77,10 +78,12 @@ createServer = ->
       res.status 200
       res.type type
       res.set 'content-encoding', 'gzip' if cache.gzipped
-      res.set 'X-UA-Compatible', 'IE=Edge,chrome=1' if req.headers['user-agent'].indexOf('MSIE') > -1 && /html?($|\?|#)/.test url
+      res.set 'X-UA-Compatible', 'IE=Edge,chrome=1' if req.headers['user-agent'].indexOf('MSIE') > -1 && /html?($|\?|#)/.test uri
       if type is 'js'
-        mapurl = fileCache[url+".map"] ? url.match(/.*[\.\/]/) + "map"
-        res.setHeader 'X-SourceMap', mapurl if fileCache[mapurl]
+        if fileCache[murl = uri+".map"]
+          res.set 'X-SourceMap', murl
+        else  if fileCache[murl = uri.match(/.*[\.\/]/)+"map"]
+          res.set 'X-SourceMap', murl
       res.set
         'Transfer-Encoding'           : 'chunked'
         'Vary'                        : 'Accept-Encoding'

@@ -40,6 +40,7 @@ ONE_HOUR = 60 * 60
 ONE_WEEK = ONE_HOUR * 24 * 7
 ONE_MONTH = ONE_WEEK * 4
 ONE_YEAR = ONE_MONTH * 12
+RE_WWW = /^www\./
 
 createServer = ->
   console.log "Number of files cached: #{files_cached}"
@@ -48,12 +49,12 @@ createServer = ->
   C404 = fileCache['/404.html'] or fileCache['/404.htm']
 
   app = http.createServer (req, res) ->
+    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + req.url if process.env.RE_WWW_CHECK and RE_WWW.test host
     req.url = req.url.replace /^(.+)\.(\d+)\.(js|css|png|jpg|gif)$/, '$1.$3'
     [uri, query] = req.url.split '?'
     uri = url.parse(uri).pathname
     # Rewrite "www.example.com -> example.com".
     host = req.headers.host
-    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + url if RE_WWW.test host
 
     res.removeHeader 'X-Powered-By'
     res.removeHeader 'Last-Modified'
@@ -61,10 +62,12 @@ createServer = ->
     if cache = fileCache[uri]
       type = (uri.replace(/.*[\.\/]/, '').toLowerCase() || 'html')
       res.setHeader 'content-encoding', 'gzip' if cache.gzipped
-      res.setHeader 'X-UA-Compatible', 'IE=Edge,chrome=1' if req.headers['user-agent'].indexOf('MSIE') > -1 && /html?($|\?|#)/.test url
+      res.setHeader 'X-UA-Compatible', 'IE=Edge,chrome=1' if req.headers['user-agent'].indexOf('MSIE') > -1 && /html?($|\?|#)/.test uri
       if type is 'js'
-        mapurl = fileCache[url+".map"] ? url.match(/.*[\.\/]/) + "map"
-        res.setHeader 'X-SourceMap', mapurl if fileCache[mapurl]
+        if fileCache[murl = uri+".map"]
+          res.setHeader 'X-SourceMap', murl
+        else  if fileCache[murl = uri.match(/.*[\.\/]/)+"map"]
+          res.setHeader 'X-SourceMap', murl
       res.writeHead 200,
         'Content-Type'                : mimeTypes[type]
         'Transfer-Encoding'           : 'chunked'
