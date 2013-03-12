@@ -33,7 +33,8 @@ Configuring Buildpack
 
 Buildpack reads its configuration from `_static.cfg`
 
-    SERVER_TYPE= "node" or "express" or "nginx"
+    SERVER_TYPE="node" or "express" or "nginx"
+    BUILD_WEB_ASSETS="true"
 
 Hacking
 -------
