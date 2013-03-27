@@ -23,7 +23,7 @@ source $BUILD_DIR/_static.cfg
 
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
-if [[ $BUILD_WEB_ASSETS ]]; then
+if [[ $BUILD_WEB_ASSETS || -f $BUILD_DIR/_webassets.cfg ]]; then
   if [[ ! -f $BUILD_DIR/_webassets.cfg ]]; then
     mv $LP_DIR/vendor/_webassets.cfg $BUILD_DIR/
   fi
