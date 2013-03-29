@@ -30,9 +30,7 @@ if [[ $BUILD_WEB_ASSETS || -f $BUILD_DIR/_webassets.cfg ]]; then
   echo "-----> Building Web Assets... "
   WEBASSETS_BUILDPACK_DIR=$(mktemp -d -t webassets.XXXXXX)
   git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-webassets.git $WEBASSETS_BUILDPACK_DIR
-  mv -f $WEBASSETS_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
-  mv $WEBASSETS_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_webassets
-  $LP_DIR/bin/compile_webassets $BUILD_DIR $CACHE_DIR | indent
+  $WEBASSETS_BUILDPACK_DIR/bin/compile $BUILD_DIR $CACHE_DIR | indent
   echo "       done."
   rm -fr $WEBASSETS_BUILDPACK_DIR
 fi
