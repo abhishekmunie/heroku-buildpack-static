@@ -168,7 +168,7 @@ mimeTypes =
   'ico': 'image/x-icon'
 
 console.time 'Caching Files'
-walk = (dir, error, onFile, end) ->
+walkDirectory = (dir, error, onFile, end) ->
   fs.readdir dir, (err, list) ->
     if err
       error(err)
@@ -177,19 +177,22 @@ walk = (dir, error, onFile, end) ->
     return end() if l == 0
     for file in list
       if file == 'Icon\r' or /(^|\/)\./.test(file) or /\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist|tmp|node_modules|bin)|~/.test(file)
-        l--
+        end() if --l == 0
         continue
       ((fn) ->
         fs.lstat fn, (err, stat) ->
-          if stat and stat.isDirectory()
-            walk fn, error, onFile, ->
+          if err
+            error(err)
+            end() if --l == 0
+          else if stat and stat.isDirectory()
+            walkDirectory fn, error, onFile, ->
               end() if --l == 0
           else
             onFile fn
             end() if --l == 0
       )(dir + '/' + file)
 
-walk _STATIC_DIR || '.', (err) ->
+walkDirectory _STATIC_DIR || '.', (err) ->
   console.error err
 , (file) ->
   process.nextTick -> generateFileCache file
