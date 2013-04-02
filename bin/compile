@@ -70,7 +70,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
   mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
   echo "done"
 
-  echo "-----> Vendoring Procfile into slug... "
+  echo -n "-----> Vendoring Procfile into slug... "
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
@@ -111,7 +111,7 @@ elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
   mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
   echo "done"
 
-  echo "-----> Vendoring Procfile into slug... "
+  echo -n "-----> Vendoring Procfile into slug... "
   if [[ ! -f $BUILD_DIR/Procfile ]]; then
     echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
     chmod +x $BUILD_DIR/Procfile
