@@ -75,7 +75,7 @@ createServer = ->
         'Connection'                  : 'Keep-Alive'
         'ETag'                        : cache.etag
         'cache-control'               : ((type) ->
-          if /(text\/(cache-manifest|html|xml)|application\/(xml|json))/.test type
+          if /(text\/(cache-manifest|html|htm|xml)|application\/(xml|json))/.test type
               cc = 'public,max-age=0';
             # Feed
           else if /application\/(rss\+xml|atom\+xml)/.test type
