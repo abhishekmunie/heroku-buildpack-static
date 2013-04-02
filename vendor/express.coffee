@@ -64,7 +64,7 @@ createServer = ->
     app.use express.session secret: process.env.SESSION_SECRET if process.env.SESSION_SECRET
 
   app.get '*', (req, res) ->
-    return res.writeHead 301, 'location' : '//' + host.replace(RE_WWW, '') + req.url if process.env.RE_WWW_CHECK and RE_WWW.test host
+    return res.redirect 301, 'location' : '//' + host.replace(RE_WWW, '') + req.url if process.env.RE_WWW_CHECK and RE_WWW.test host
     req.url = req.url.replace /^(.+)\.(\d+)\.(js|css|png|jpg|gif)$/, '$1.$3'
     uri = url.parse(req.url).pathname
     # Rewrite "www.example.com -> example.com".
