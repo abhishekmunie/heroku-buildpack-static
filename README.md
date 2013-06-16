@@ -26,7 +26,7 @@ Example usage:
     ...
 
 The buildpack will detect your app as Static if it has the file `_static.cfg` in the `root`.
-For nginx, you can set custom nginx config as described for [heroku-buildpack-nginx](https://github.com/abhishekmunie/heroku-buildpack-nginx.
+For nginx, you can set custom nginx config as described for [heroku-buildpack-nginx](https://github.com/abhishekmunie/heroku-buildpack-nginx).
 
 Configuring Buildpack
 ---------------------
