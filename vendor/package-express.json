@@ -23,11 +23,11 @@
   "main": "server.js",
   "dependencies": {
     "coffee-script": "latest",
-    "connect": "latest",
-    "express": "latest",
-    "resolve-path": "latest",
-    "serve-static": "latest",
-    "static-favicon": "latest",
+    "connect": "2.x.x",
+    "express": "4.x.x",
+    "resolve-path": "1.x.x",
+    "serve-static": "1.x.x",
+    "static-favicon": "2.x.x",
     "cachelicious": "cblage/node-cachelicious"
   },
   "scripts": {
