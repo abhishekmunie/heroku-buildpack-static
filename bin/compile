@@ -23,22 +23,7 @@ source $BUILD_DIR/_static.cfg
 
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
-if [[ $BUILD_WEB_ASSETS || -f $BUILD_DIR/_webassets.cfg ]]; then
-  if [[ ! -f $BUILD_DIR/_webassets.cfg ]]; then
-    mv $LP_DIR/vendor/_webassets.cfg $BUILD_DIR/
   fi
-  echo "-----> Building Web Assets... "
-  WEBASSETS_BUILDPACK_DIR=$(mktemp -d -t webassets.XXXXXX)
-  git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-webassets.git $WEBASSETS_BUILDPACK_DIR
-  $WEBASSETS_BUILDPACK_DIR/bin/compile $BUILD_DIR $CACHE_DIR | indent
-  echo "       done."
-  rm -fr $WEBASSETS_BUILDPACK_DIR
-fi
-
-if [[ ! -f $BUILD_DIR/404.html && ! -f $BUILD_DIR/404.htm ]]; then
-  echo -n "-----> Vendoring default 404.html into slug... "
-  mv $LP_DIR/vendor/404.html  $BUILD_DIR/404.html
-  echo "done"
 fi
 
 if [[ ! $SERVER_TYPE ]]; then
