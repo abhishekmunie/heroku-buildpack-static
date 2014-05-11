@@ -105,11 +105,9 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
     echo "-----> Using existing nginx configuration."
   else
     echo -n "-----> Vendoring default nginx configuration into slug... "
-    if [[ ! -d ${build_dir}/conf ]]; then
-      mkdir ${build_dir}/conf
-    fi
-    mv $bp_dir/vendor/mime.types ${build_dir}/conf/mime.types
-    mv $bp_dir/vendor/nginx.conf.erb ${build_dir}/conf/nginx.conf.erb
+    mkdir -p "${build_dir}/conf"
+    mv "$bp_dir/vendor/mime.types" "$build_dir/conf/mime.types"
+    mv "$bp_dir/vendor/nginx.conf.erb" "$build_dir/conf/nginx.conf.erb"
     echo "done"
   fi
 
@@ -118,9 +116,8 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
   echo "-----> Initiating Nginx Buildpack... "
   NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
   git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $NGINX_BUILDPACK_DIR
-  mv -f $NGINX_BUILDPACK_DIR/vendor/* $bp_dir/vendor
-  mv $NGINX_BUILDPACK_DIR/bin/compile $bp_dir/bin/compile_nginx
-  $bp_dir/bin/compile_nginx $build_dir $cache_dir | indent
+  chmod -f +x $NGINX_BUILDPACK_DIR/bin/{detect,compile,release} || true
+  $NGINX_BUILDPACK_DIR/bin/compile $build_dir $cache_dir
   echo "       done."
   rm -fr $NGINX_BUILDPACK_DIR
 
