@@ -55,7 +55,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
   if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
 
     if [ -f $build_dir/package.json ]; then
-      echo "-----> Using existing package.json"
+      status "Using existing package.json"
     else
       echo -n "-----> Vendoring package.json for $SERVER_TYPE server into slug... "
       mv "$bp_dir/vendor/package.json" "$build_dir/package.json"
@@ -63,7 +63,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
     fi
 
     if [ -f $build_dir/server.js ]; then
-      echo "-----> Using existing server.js"
+      status "Using existing server.js"
     else
       echo -n "-----> Vendoring server.js for $SERVER_TYPE server into slug... "
       mv "$bp_dir/vendor/server.js" "$build_dir/server.js"
@@ -73,7 +73,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
   elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
 
     if [ -f $build_dir/package.json ]; then
-      echo "-----> Using existing package.json"
+      status "Using existing package.json"
     else
       echo -n "-----> Vendoring package.json for $SERVER_TYPE server into slug... "
       mv "$bp_dir/vendor/package-express.json" "$build_dir/package.json"
@@ -81,7 +81,7 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
     fi
 
     if [ -f $build_dir/server.js ]; then
-      echo "-----> Using existing server.js"
+      status "Using existing server.js"
     else
       echo -n "-----> Vendoring server.js for $SERVER_TYPE server into slug... "
       mv "$bp_dir/vendor/express.js" "$build_dir/server.js"
@@ -102,7 +102,7 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
   # init default nginx configuration ----------
 
   if [ -d "${build_dir}/conf" ]; then
-    echo "-----> Using existing nginx configuration."
+    status "Using existing nginx configuration."
   else
     echo -n "-----> Vendoring default nginx configuration into slug... "
     mkdir -p "${build_dir}/conf"
@@ -113,7 +113,7 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
 
   # Nginx -------------------------------------
 
-  echo "-----> Initiating Nginx Buildpack... "
+  status "Initiating Nginx Buildpack... "
   NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
   git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $NGINX_BUILDPACK_DIR
   chmod -f +x $NGINX_BUILDPACK_DIR/bin/{detect,compile,release} || true
