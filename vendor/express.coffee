@@ -1,8 +1,7 @@
-path          = require 'path'
-http          = require 'http'
-express       = require 'express'
-session       = require 'express-session'
-favicon       = require 'static-favicon'
+path    = require 'path'
+http    = require 'http'
+express = require 'express'
+favicon = require 'static-favicon'
 
 STATIC_DIR = process.env['STATIC_DIR'] || '.'
 
@@ -16,11 +15,11 @@ else
 
 app = express()
 
-app.set 'env', config.env
-app.set 'port', process.env['PORT']
+app.set 'port', process.env['PORT'] || 1337
 
 app.enable 'trust proxy'
-app.use favicon 'favicon.ico'
+console.log path.resolve STATIC_DIR, 'favicon.ico'
+app.use favicon path.resolve STATIC_DIR, 'favicon.ico'
 
 ## catch 404 and forwarding to error handler
 app.use '/error', (req, res, next) ->
@@ -28,6 +27,41 @@ app.use '/error', (req, res, next) ->
   err.status = 404
   next err
   return
+
+if process.env['USE_CACHEBUSTING_API']
+  console.log "Using Cachebusting"
+  fs = require 'fs'
+  resolve = require 'resolve-path'
+  crypto = require 'crypto'
+  app.get /^\/_api\/(.+)$/, (req, res, next) ->
+    sha1Hash = crypto.createHash 'sha1'
+    sha1Hash.setEncoding 'hex'
+    try
+      rs = fs.ReadStream resolve path.resolve(STATIC_DIR), req.params[0]
+      rs.on 'end', ->
+        sha1Hash.end()
+        sha1 = sha1Hash.read()
+        res.format
+          'text/plain': ->
+            res.send sha1
+            return
+          'text/html': ->
+            res.send sha1
+            return
+          'application/json': ->
+            res.send
+              sha1: sha1
+            return
+        return
+      rs.pipe sha1Hash
+    catch err
+      next err
+    return
+
+  app.use (req, res, next) ->
+    req.url = req.url.replace /^\/[0-9a-f]{40}\/(.*)$/, '/$1'
+    next()
+    return
 
 app.all /.*\/[^\.\/]*$/, (req, res, next) ->
   [urlPath, query] = req.url.split '?'
