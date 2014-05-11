@@ -21,12 +21,8 @@
   },
   "main": "server.js",
   "dependencies": {
-    "coffee-script": "latest",
     "resolve-path": "latest",
     "finished": "latest",
     "cachelicious": "cblage/node-cachelicious"
-  },
-  "scripts": {
-    "start": "server.js"
   }
 }
