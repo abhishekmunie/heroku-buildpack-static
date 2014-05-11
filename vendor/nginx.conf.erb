@@ -79,7 +79,7 @@ http {
     server_name      localhost;
 
     # Path for static files
-    root .;
+    root <%= ENV['STATIC_DIR'] || '.' %>;
 
     #Specify a charset
     charset utf-8;
