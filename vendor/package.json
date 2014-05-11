@@ -1,7 +1,7 @@
 {
   "name": "node-static",
   "description": "A nodejs static file server.",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "authors": [
     {
       "name": "Abhishek Munie",
@@ -14,15 +14,17 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/abhishekmunie/heroku-buildpack-static-node.git"
+    "url": "https://github.com/abhishekmunie/heroku-buildpack-static.git"
   },
   "engines": {
-    "node"        : ">=0.8.15",
-    "npm"         : ">=1.1.39"
+    "node": "0.10.x"
   },
-  "main": "server.coffee",
+  "main": "server.js",
   "dependencies": {
-    "coffee-script" : "latest"
+    "coffee-script": "latest",
+    "resolve-path": "latest",
+    "finished": "latest",
+    "cachelicious": "cblage/node-cachelicious"
   },
   "scripts": {
     "start": "server.js"

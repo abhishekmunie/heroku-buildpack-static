@@ -1,7 +1,7 @@
 {
-  "name": "node-static",
+  "name": "express-static",
   "description": "A nodejs static file server.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "authors": [
     {
       "name": "Abhishek Munie",
@@ -10,20 +10,25 @@
   ],
   "keywords": [
     "nodejs",
+    "express",
     "static file server"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/abhishekmunie/heroku-buildpack-static-node.git"
+    "url": "https://github.com/abhishekmunie/heroku-buildpack-static.git"
   },
   "engines": {
-    "node"        : ">=0.8.15",
-    "npm"         : ">=1.1.39"
+    "node": "0.10.x"
   },
-  "main": "server.coffee",
+  "main": "server.js",
   "dependencies": {
-    "coffee-script" : "latest",
-    "express"       : "latest"
+    "coffee-script": "latest",
+    "connect": "latest",
+    "express": "latest",
+    "resolve-path": "latest",
+    "serve-static": "latest",
+    "static-favicon": "latest",
+    "cachelicious": "cblage/node-cachelicious"
   },
   "scripts": {
     "start": "server.js"

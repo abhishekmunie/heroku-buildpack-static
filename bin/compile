@@ -26,14 +26,22 @@ fi
 
 bp_dir=`cd $(dirname $0); cd ..; pwd`
 
-if [[ ! -f $build_dir/404.html ]]; then
+if [[ ! -f $build_dir/error/404.html ]]; then
   if [[ ! -f $build_dir/404.htm ]]; then
+    echo -n "-----> Movinging /404.htm to /error/404.html... "
+    mv "$build_dir/404.htm" "$build_dir/error/404.html"
+    echo "done"
+  else if [[ ! -f $build_dir/404.html ]]; then
+    echo -n "-----> Movinging /404.htm to /error/404.html... "
+    mv "$build_dir/404.html" "$build_dir/error/404.html"
+    echo "done"
+  else if [[ ! -f $build_dir/error/404.htm ]]; then
     echo -n "-----> Renaming 404.htm to 404.html... "
-    mv $build_dir/404.htm  $build_dir/404.html
+    mv "$build_dir/error/404.htm" "$build_dir/error/404.html"
     echo "done"
   else
     echo -n "-----> Vendoring default 404.html into slug... "
-    mv $bp_dir/vendor/404.html  $build_dir/404.html
+    mv "$bp_dir/vendor/404.html" "$build_dir/404.html"
     echo "done"
   fi
 fi
@@ -42,86 +50,51 @@ if [[ ! $SERVER_TYPE ]]; then
   SERVER_TYPE="node"
 fi
 
-if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
+if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
 
-  if [ -f $build_dir/package.json ]; then
-    echo "-----> Using existiong package.json"
-  else
-    echo -n "-----> Vendoring package.json for node into slug... "
-    mv $bp_dir/vendor/package.json  $build_dir/package.json
-    echo "done"
+  if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
+
+    if [ -f $build_dir/package.json ]; then
+      echo "-----> Using existing package.json"
+    else
+      echo -n "-----> Vendoring package.json for $SERVER_TYPE server into slug... "
+      mv "$bp_dir/vendor/package.json" "$build_dir/package.json"
+      echo "done"
+    fi
+
+    if [ -f $build_dir/server.js ]; then
+      echo "-----> Using existing server.js"
+    else
+      echo -n "-----> Vendoring server.js for $SERVER_TYPE server into slug... "
+      mv "$bp_dir/vendor/server.js" "$build_dir/server.js"
+      echo "done"
+    fi
+
+  elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
+
+    if [ -f $build_dir/package.json ]; then
+      echo "-----> Using existing package.json"
+    else
+      echo -n "-----> Vendoring package.json for $SERVER_TYPE server into slug... "
+      mv "$bp_dir/vendor/package-express.json" "$build_dir/package.json"
+      echo "done"
+    fi
+
+    if [ -f $build_dir/server.js ]; then
+      echo "-----> Using existing server.js"
+    else
+      echo -n "-----> Vendoring server.js for $SERVER_TYPE server into slug... "
+      mv "$bp_dir/vendor/express.js" "$build_dir/server.js"
+      echo "done"
+    fi
+
   fi
 
-  if [ -f $build_dir/server.coffee ]; then
-    echo "-----> Using existiong server.coffee"
-  else
-    echo -n "-----> Vendoring server.coffee for node into slug... "
-    mv $bp_dir/vendor/server.coffee $build_dir/server.coffee
-    echo "done"
-  fi
-
-  echo -n "-----> Vendoring lib files into slug... "
-  if [ ! -d ${build_dir}/lib ]; then
-    mkdir ${build_dir}/lib
-  fi
-  mv -f $bp_dir/vendor/lib/* $build_dir/lib
-  echo "done"
-
-  echo -n "-----> Vendoring Procfile into slug... "
-  if [[ ! -f $build_dir/Procfile ]]; then
-    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $build_dir/Procfile
-    chmod +x $build_dir/Procfile
-  fi
-  echo "done"
-
-  echo "-----> Initiating Node.js Buildpack... "
+  status "Installing Node and build dependencies..."
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv -f $NODE_BUILDPACK_DIR/vendor/* $bp_dir/vendor
-  mv $NODE_BUILDPACK_DIR/bin/compile $bp_dir/bin/compile_node
-  $bp_dir/bin/compile_node $build_dir $cache_dir | indent
-  echo "       done."
-  rm -fr $NODE_BUILDPACK_DIR
-
-elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
-
-  if [ -f $build_dir/package.json ]; then
-    echo "-----> Using existiong package.json"
-  else
-    echo -n "-----> Vendoring package.json for express into slug... "
-    mv $bp_dir/vendor/package-express.json $build_dir/package.json
-    echo "done"
-  fi
-
-  if [ -f $build_dir/server.coffee ]; then
-    echo "-----> Using existiong server.coffee"
-  else
-    echo -n "-----> Vendoring server.coffee for express into slug... "
-    mv $bp_dir/vendor/express.coffee $build_dir/server.coffee
-    echo "done"
-  fi
-
-  echo -n "-----> Vendoring lib files into slug... "
-  if [ ! -d ${build_dir}/lib ]; then
-    mkdir ${build_dir}/lib
-  fi
-  mv -f $bp_dir/vendor/lib/* $build_dir/lib
-  echo "done"
-
-  echo -n "-----> Vendoring Procfile into slug... "
-  if [[ ! -f $build_dir/Procfile ]]; then
-    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $build_dir/Procfile
-    chmod +x $build_dir/Procfile
-  fi
-  echo "done"
-
-  echo "-----> Initiating Node.js Buildpack... "
-  NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
-  git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv -f $NODE_BUILDPACK_DIR/vendor/* $bp_dir/vendor
-  mv $NODE_BUILDPACK_DIR/bin/compile $bp_dir/bin/compile_node
-  $bp_dir/bin/compile_node $build_dir $cache_dir | indent
-  echo "       done."
+  chmod -f +x $NODE_BUILDPACK_DIR/bin/{detect,compile,release} || true
+  $NODE_BUILDPACK_DIR/bin/compile $build_dir $cache_dir
   rm -fr $NODE_BUILDPACK_DIR
 
 elif [[ $SERVER_TYPE == "nginx" ]]; then
