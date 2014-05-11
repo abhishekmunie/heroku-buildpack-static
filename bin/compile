@@ -23,6 +23,15 @@ source $BUILD_DIR/_static.cfg
 
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
+if [[ ! -f $BUILD_DIR/404.html ]]; then
+  if [[ ! -f $BUILD_DIR/404.htm ]]; then
+    echo -n "-----> Renaming 404.htm to 404.html... "
+    mv $BUILD_DIR/404.htm  $BUILD_DIR/404.html
+    echo "done"
+  else
+    echo -n "-----> Vendoring default 404.html into slug... "
+    mv $LP_DIR/vendor/404.html  $BUILD_DIR/404.html
+    echo "done"
   fi
 fi
 
