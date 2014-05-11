@@ -1,36 +1,39 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir>
 
-# fail fast
-set -e
+set -e            # fail fast
+set -o pipefail   # don't ignore exit codes when piping output
+# set -x          # enable debugging
+
+# Configure directories
+build_dir=$1
+cache_dir=$2
+env_dir=$3
+
+bp_dir=$(cd $(dirname $0); cd ..; pwd)
 
 # clean up leaking environment
 unset GIT_DIR
 
-# parse args
-BUILD_DIR=$1
-CACHE_DIR=$2
+# Load some convenience functions like status(), echo(), and indent()
+source $bp_dir/bin/common.sh
 
-function indent() {
-  c='s/^/       /'
-  case $(uname) in
-    Darwin) sed -l "$c";;
-    *)      sed -u "$c";;
-  esac
-}
+source "$build_dir/_static.cfg"
 
-source $BUILD_DIR/_static.cfg
+if [ ! -e $build_dir/Procfile ]; then
+  Generate_Procfile=true
+fi
 
-LP_DIR=`cd $(dirname $0); cd ..; pwd`
+bp_dir=`cd $(dirname $0); cd ..; pwd`
 
-if [[ ! -f $BUILD_DIR/404.html ]]; then
-  if [[ ! -f $BUILD_DIR/404.htm ]]; then
+if [[ ! -f $build_dir/404.html ]]; then
+  if [[ ! -f $build_dir/404.htm ]]; then
     echo -n "-----> Renaming 404.htm to 404.html... "
-    mv $BUILD_DIR/404.htm  $BUILD_DIR/404.html
+    mv $build_dir/404.htm  $build_dir/404.html
     echo "done"
   else
     echo -n "-----> Vendoring default 404.html into slug... "
-    mv $LP_DIR/vendor/404.html  $BUILD_DIR/404.html
+    mv $bp_dir/vendor/404.html  $build_dir/404.html
     echo "done"
   fi
 fi
@@ -41,83 +44,83 @@ fi
 
 if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
 
-  if [ -f $BUILD_DIR/package.json ]; then
+  if [ -f $build_dir/package.json ]; then
     echo "-----> Using existiong package.json"
   else
     echo -n "-----> Vendoring package.json for node into slug... "
-    mv $LP_DIR/vendor/package.json  $BUILD_DIR/package.json
+    mv $bp_dir/vendor/package.json  $build_dir/package.json
     echo "done"
   fi
 
-  if [ -f $BUILD_DIR/server.coffee ]; then
+  if [ -f $build_dir/server.coffee ]; then
     echo "-----> Using existiong server.coffee"
   else
     echo -n "-----> Vendoring server.coffee for node into slug... "
-    mv $LP_DIR/vendor/server.coffee $BUILD_DIR/server.coffee
+    mv $bp_dir/vendor/server.coffee $build_dir/server.coffee
     echo "done"
   fi
 
   echo -n "-----> Vendoring lib files into slug... "
-  if [ ! -d ${BUILD_DIR}/lib ]; then
-    mkdir ${BUILD_DIR}/lib
+  if [ ! -d ${build_dir}/lib ]; then
+    mkdir ${build_dir}/lib
   fi
-  mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
+  mv -f $bp_dir/vendor/lib/* $build_dir/lib
   echo "done"
 
   echo -n "-----> Vendoring Procfile into slug... "
-  if [[ ! -f $BUILD_DIR/Procfile ]]; then
-    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
-    chmod +x $BUILD_DIR/Procfile
+  if [[ ! -f $build_dir/Procfile ]]; then
+    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $build_dir/Procfile
+    chmod +x $build_dir/Procfile
   fi
   echo "done"
 
   echo "-----> Initiating Node.js Buildpack... "
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv -f $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
-  mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
-  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
+  mv -f $NODE_BUILDPACK_DIR/vendor/* $bp_dir/vendor
+  mv $NODE_BUILDPACK_DIR/bin/compile $bp_dir/bin/compile_node
+  $bp_dir/bin/compile_node $build_dir $cache_dir | indent
   echo "       done."
   rm -fr $NODE_BUILDPACK_DIR
 
 elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
 
-  if [ -f $BUILD_DIR/package.json ]; then
+  if [ -f $build_dir/package.json ]; then
     echo "-----> Using existiong package.json"
   else
     echo -n "-----> Vendoring package.json for express into slug... "
-    mv $LP_DIR/vendor/package-express.json $BUILD_DIR/package.json
+    mv $bp_dir/vendor/package-express.json $build_dir/package.json
     echo "done"
   fi
 
-  if [ -f $BUILD_DIR/server.coffee ]; then
+  if [ -f $build_dir/server.coffee ]; then
     echo "-----> Using existiong server.coffee"
   else
     echo -n "-----> Vendoring server.coffee for express into slug... "
-    mv $LP_DIR/vendor/express.coffee $BUILD_DIR/server.coffee
+    mv $bp_dir/vendor/express.coffee $build_dir/server.coffee
     echo "done"
   fi
 
   echo -n "-----> Vendoring lib files into slug... "
-  if [ ! -d ${BUILD_DIR}/lib ]; then
-    mkdir ${BUILD_DIR}/lib
+  if [ ! -d ${build_dir}/lib ]; then
+    mkdir ${build_dir}/lib
   fi
-  mv -f $LP_DIR/vendor/lib/* $BUILD_DIR/lib
+  mv -f $bp_dir/vendor/lib/* $build_dir/lib
   echo "done"
 
   echo -n "-----> Vendoring Procfile into slug... "
-  if [[ ! -f $BUILD_DIR/Procfile ]]; then
-    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $BUILD_DIR/Procfile
-    chmod +x $BUILD_DIR/Procfile
+  if [[ ! -f $build_dir/Procfile ]]; then
+    echo "web: exec env NODE_PATH=\"\$(dirname \$(dirname \$0))/lib\" coffee server.coffee" > $build_dir/Procfile
+    chmod +x $build_dir/Procfile
   fi
   echo "done"
 
   echo "-----> Initiating Node.js Buildpack... "
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  mv -f $NODE_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
-  mv $NODE_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_node
-  $LP_DIR/bin/compile_node $BUILD_DIR $CACHE_DIR | indent
+  mv -f $NODE_BUILDPACK_DIR/vendor/* $bp_dir/vendor
+  mv $NODE_BUILDPACK_DIR/bin/compile $bp_dir/bin/compile_node
+  $bp_dir/bin/compile_node $build_dir $cache_dir | indent
   echo "       done."
   rm -fr $NODE_BUILDPACK_DIR
 
@@ -125,15 +128,15 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
 
   # init default nginx configuration ----------
 
-  if [ -d "${BUILD_DIR}/conf" ]; then
+  if [ -d "${build_dir}/conf" ]; then
     echo "-----> Using existing nginx configuration."
   else
     echo -n "-----> Vendoring default nginx configuration into slug... "
-    if [[ ! -d ${BUILD_DIR}/conf ]]; then
-      mkdir ${BUILD_DIR}/conf
+    if [[ ! -d ${build_dir}/conf ]]; then
+      mkdir ${build_dir}/conf
     fi
-    mv $LP_DIR/vendor/mime.types ${BUILD_DIR}/conf/mime.types
-    mv $LP_DIR/vendor/nginx.conf.erb ${BUILD_DIR}/conf/nginx.conf.erb
+    mv $bp_dir/vendor/mime.types ${build_dir}/conf/mime.types
+    mv $bp_dir/vendor/nginx.conf.erb ${build_dir}/conf/nginx.conf.erb
     echo "done"
   fi
 
@@ -142,9 +145,9 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
   echo "-----> Initiating Nginx Buildpack... "
   NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
   git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $NGINX_BUILDPACK_DIR
-  mv -f $NGINX_BUILDPACK_DIR/vendor/* $LP_DIR/vendor
-  mv $NGINX_BUILDPACK_DIR/bin/compile $LP_DIR/bin/compile_nginx
-  $LP_DIR/bin/compile_nginx $BUILD_DIR $CACHE_DIR | indent
+  mv -f $NGINX_BUILDPACK_DIR/vendor/* $bp_dir/vendor
+  mv $NGINX_BUILDPACK_DIR/bin/compile $bp_dir/bin/compile_nginx
+  $bp_dir/bin/compile_nginx $build_dir $cache_dir | indent
   echo "       done."
   rm -fr $NGINX_BUILDPACK_DIR
 
