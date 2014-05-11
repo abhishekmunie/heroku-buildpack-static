@@ -51,7 +51,7 @@ staticHandler = function(pathname, req, res, callback) {
 };
 
 errorHandler = function(err, pathname, req, res) {
-  console.error(err.stack);
+  console.error("" + pathname + ": ", err.stack);
   res.status(err.status || 500);
   if (req.xhr) {
     res.send({

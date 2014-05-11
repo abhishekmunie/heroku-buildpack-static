@@ -67,7 +67,7 @@ app.use(function(req, res, next) {
 });
 
 app.use(function(err, req, res, next) {
-  console.error(err.stack);
+  console.error("" + req.url + ": ", err.stack);
   next(err);
 });
 

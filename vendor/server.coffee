@@ -34,7 +34,7 @@ staticHandler = (pathname, req, res, callback) ->
   return
 
 errorHandler = (err, pathname, req, res) ->
-  console.error err.stack
+  console.error "#{pathname}: ", err.stack
 
   res.status err.status || 500
   if req.xhr

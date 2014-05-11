@@ -53,7 +53,7 @@ app.use (req, res, next) ->
 
 ## error handler
 app.use (err, req, res, next) ->
-  console.error err.stack
+  console.error "#{req.url}: ", err.stack
   next err
   return
 
