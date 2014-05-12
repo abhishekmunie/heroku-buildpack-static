@@ -21,8 +21,9 @@
   },
   "main": "server.js",
   "dependencies": {
-    "resolve-path": "latest",
-    "finished": "latest",
+    "resolve-path": "1.x.x",
+    "mime-types": "0.x.x",
+    "finished": "1.x.x",
     "cachelicious": "cblage/node-cachelicious"
   }
 }
