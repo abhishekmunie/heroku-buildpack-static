@@ -27,15 +27,15 @@ fi
 bp_dir=`cd $(dirname $0); cd ..; pwd`
 
 if [[ ! -f $build_dir/error/404.html ]]; then
-  if [[ ! -f $build_dir/404.htm ]]; then
+  if [[ -f $build_dir/404.htm ]]; then
     echo -n "-----> Movinging /404.htm to /error/404.html... "
     mv "$build_dir/404.htm" "$build_dir/error/404.html"
     echo "done"
-  elif [[ ! -f $build_dir/404.html ]]; then
+  elif [[ -f $build_dir/404.html ]]; then
     echo -n "-----> Movinging /404.htm to /error/404.html... "
     mv "$build_dir/404.html" "$build_dir/error/404.html"
     echo "done"
-  elif [[ ! -f $build_dir/error/404.htm ]]; then
+  elif [[ -f $build_dir/error/404.htm ]]; then
     echo -n "-----> Renaming 404.htm to 404.html... "
     mv "$build_dir/error/404.htm" "$build_dir/error/404.html"
     echo "done"
