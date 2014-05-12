@@ -25,6 +25,8 @@ staticHandler = (pathname, req, res, callback) ->
     absolutePath = resolve path.resolve(STATIC_DIR), pathname.slice 1
     stream = fs.createReadStream absolutePath
     res.setHeader "Content-Type", mime.lookup pathname
+    stream.on 'error', (err) ->
+      callback err
     stream.pipe res
     onFinished res, (err) ->
       stream.destroy()
@@ -39,8 +41,8 @@ errorHandler = (err, pathname, req, res) ->
   res.statusCode = err.status or 500
   pathname = "/error/#{err.status or 500}.html"
   staticHandler pathname, req, res, (err) ->
-    res.writeHead 500, 'Content-Type': 'text/plain'
-    res.end 'Something blew up!'
+    res.setHeader 'Content-Type', 'text/plain'
+    res.end if res.statusCode is 404 then '404 Not Found!' else 'Something blew up!'
     return
   return
 

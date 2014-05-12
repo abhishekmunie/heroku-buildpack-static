@@ -39,6 +39,9 @@ staticHandler = function(pathname, req, res, callback) {
     absolutePath = resolve(path.resolve(STATIC_DIR), pathname.slice(1));
     stream = fs.createReadStream(absolutePath);
     res.setHeader("Content-Type", mime.lookup(pathname));
+    stream.on('error', function(err) {
+      return callback(err);
+    });
     stream.pipe(res);
     onFinished(res, function(err) {
       stream.destroy();
@@ -54,10 +57,8 @@ errorHandler = function(err, pathname, req, res) {
   res.statusCode = err.status || 500;
   pathname = "/error/" + (err.status || 500) + ".html";
   staticHandler(pathname, req, res, function(err) {
-    res.writeHead(500, {
-      'Content-Type': 'text/plain'
-    });
-    res.end('Something blew up!');
+    res.setHeader('Content-Type', 'text/plain');
+    res.end(res.statusCode === 404 ? '404 Not Found!' : 'Something blew up!');
   });
 };
 
