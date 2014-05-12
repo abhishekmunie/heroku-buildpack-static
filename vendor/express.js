@@ -28,8 +28,6 @@ app.set('port', process.env['PORT'] || 1337);
 
 app.enable('trust proxy');
 
-console.log(path.resolve(STATIC_DIR, 'favicon.ico'));
-
 app.use(favicon(path.resolve(STATIC_DIR, 'favicon.ico')));
 
 app.use('/error', function(req, res, next) {
@@ -40,7 +38,6 @@ app.use('/error', function(req, res, next) {
 });
 
 if (process.env['USE_CACHEBUSTING_API']) {
-  console.log("Using Cachebusting");
   fs = require('fs');
   resolve = require('resolve-path');
   crypto = require('crypto');
@@ -74,10 +71,6 @@ if (process.env['USE_CACHEBUSTING_API']) {
       next(err);
     }
   });
-  app.use(function(req, res, next) {
-    req.url = req.url.replace(/^\/[0-9a-f]{40}\/(.*)$/, '/$1');
-    next();
-  });
 }
 
 app.all(/.*\/[^\.\/]*$/, function(req, res, next) {
@@ -92,6 +85,7 @@ app.use(function(req, res, next) {
   if (req.url[1] === '_' || /^\/(.*\/_.*|node_modules\/.*|package.json|server.js|Procfile|vendor\/.*)$/.test(req.url)) {
     return next();
   }
+  req.url = req.url.replace(/^\/[0-9a-f]{40}\/(.*)$/, '/$1');
   req.url = req.url.replace(/^(.+)\.(\d+)\.(js|css|png|jpg|gif|jpeg)$/, '$1.$3');
   res.removeHeader('X-Powered-By');
   res.removeHeader('Last-Modified');
