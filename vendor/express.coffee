@@ -15,10 +15,9 @@ else
 
 app = express()
 
-app.set 'port', process.env['PORT'] || 1337
+app.set 'port', process.env['PORT'] or 1337
 
 app.enable 'trust proxy'
-console.log path.resolve STATIC_DIR, 'favicon.ico'
 app.use favicon path.resolve STATIC_DIR, 'favicon.ico'
 
 ## catch 404 and forwarding to error handler
@@ -29,7 +28,6 @@ app.use '/error', (req, res, next) ->
   return
 
 if process.env['USE_CACHEBUSTING_API']
-  console.log "Using Cachebusting"
   fs = require 'fs'
   resolve = require 'resolve-path'
   crypto = require 'crypto'
@@ -58,11 +56,6 @@ if process.env['USE_CACHEBUSTING_API']
       next err
     return
 
-  app.use (req, res, next) ->
-    req.url = req.url.replace /^\/[0-9a-f]{40}\/(.*)$/, '/$1'
-    next()
-    return
-
 app.all /.*\/[^\.\/]*$/, (req, res, next) ->
   [urlPath, query] = req.url.split '?'
   [urlPath, query] = req.url.split '?'
@@ -73,7 +66,10 @@ app.all /.*\/[^\.\/]*$/, (req, res, next) ->
 ## static content handler
 app.use (req, res, next) ->
   return next() if req.url[1] is '_' or /^\/(.*\/_.*|node_modules\/.*|package.json|server.js|Procfile|vendor\/.*)$/.test req.url
+
+  req.url = req.url.replace /^\/[0-9a-f]{40}\/(.*)$/, '/$1'
   req.url = req.url.replace /^(.+)\.(\d+)\.(js|css|png|jpg|gif|jpeg)$/, '$1.$3'
+
   res.removeHeader 'X-Powered-By'
   res.removeHeader 'Last-Modified'
   return staticHandler.apply @, arguments
