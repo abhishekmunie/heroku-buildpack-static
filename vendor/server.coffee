@@ -15,6 +15,7 @@ if process.env['USE_CACHELICIOUS']
 else
   fs = require 'fs'
 
+## cache values
 ONE_HOUR = 60 * 60
 ONE_WEEK = ONE_HOUR * 24 * 7
 ONE_MONTH = ONE_WEEK * 4

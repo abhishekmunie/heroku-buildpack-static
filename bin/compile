@@ -94,7 +94,8 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
   chmod -f +x $NODE_BUILDPACK_DIR/bin/{detect,compile,release} || true
-  $NODE_BUILDPACK_DIR/bin/compile $build_dir $cache_dir
+  mkdir -p $cache_dir/static
+  $NODE_BUILDPACK_DIR/bin/compile $build_dir $cache_dir/static
   rm -fr $NODE_BUILDPACK_DIR
 
 elif [[ $SERVER_TYPE == "nginx" ]]; then
@@ -104,7 +105,7 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
   if [ -d "${build_dir}/conf" ]; then
     status "Using existing nginx configuration."
   else
-    echo -n "-----> Vendoring default nginx configuration into slug... "
+    status "Vendoring default nginx configuration into slug... "
     mkdir -p "${build_dir}/conf"
     mv "$bp_dir/vendor/mime.types" "$build_dir/conf/mime.types"
     mv "$bp_dir/vendor/nginx.conf.erb" "$build_dir/conf/nginx.conf.erb"
@@ -117,7 +118,8 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
   NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
   git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $NGINX_BUILDPACK_DIR
   chmod -f +x $NGINX_BUILDPACK_DIR/bin/{detect,compile,release} || true
-  $NGINX_BUILDPACK_DIR/bin/compile $build_dir $cache_dir
+  mkdir -p $cache_dir/static
+  $NGINX_BUILDPACK_DIR/bin/compile $build_dir $cache_dir/static
   echo "       done."
   rm -fr $NGINX_BUILDPACK_DIR
 
