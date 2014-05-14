@@ -26,82 +26,91 @@ fi
 
 bp_dir=`cd $(dirname $0); cd ..; pwd`
 
+mkdir -p $cache_dir/static
+
+
 if [[ ! -f $build_dir/error/404.html ]]; then
   if [[ -f $build_dir/404.htm ]]; then
-    echo -n "-----> Movinging /404.htm to /error/404.html... "
+    status "Movinging /404.htm to /error/404.html... "
     mv "$build_dir/404.htm" "$build_dir/error/404.html"
-    echo "done"
   elif [[ -f $build_dir/404.html ]]; then
-    echo -n "-----> Movinging /404.htm to /error/404.html... "
+    status "Movinging /404.htm to /error/404.html... "
     mv "$build_dir/404.html" "$build_dir/error/404.html"
-    echo "done"
   elif [[ -f $build_dir/error/404.htm ]]; then
-    echo -n "-----> Renaming 404.htm to 404.html... "
+    status "Renaming 404.htm to 404.html... "
     mv "$build_dir/error/404.htm" "$build_dir/error/404.html"
-    echo "done"
   else
-    echo -n "-----> Vendoring default 404.html into slug... "
+    status "Vendoring default 404.html into slug... "
     mv "$bp_dir/vendor/404.html" "$build_dir/404.html"
-    echo "done"
   fi
 fi
 
+# Sets default server type
 if [[ ! $SERVER_TYPE ]]; then
   SERVER_TYPE="node"
 fi
 
 if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
 
-  if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
 
-    if [ -f $build_dir/package.json ]; then
-      status "Using existing package.json"
-    else
-      echo -n "-----> Vendoring package.json for $SERVER_TYPE server into slug... "
-      mv "$bp_dir/vendor/package.json" "$build_dir/package.json"
-      echo "done"
-    fi
-
-    if [ -f $build_dir/server.js ]; then
-      status "Using existing server.js"
-    else
-      echo -n "-----> Vendoring server.js for $SERVER_TYPE server into slug... "
-      mv "$bp_dir/vendor/server.js" "$build_dir/server.js"
-      echo "done"
-    fi
-
-  elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
-
-    if [ -f $build_dir/package.json ]; then
-      status "Using existing package.json"
-    else
-      echo -n "-----> Vendoring package.json for $SERVER_TYPE server into slug... "
-      mv "$bp_dir/vendor/package-express.json" "$build_dir/package.json"
-      echo "done"
-    fi
-
-    if [ -f $build_dir/server.js ]; then
-      status "Using existing server.js"
-    else
-      echo -n "-----> Vendoring server.js for $SERVER_TYPE server into slug... "
-      mv "$bp_dir/vendor/express.js" "$build_dir/server.js"
-      echo "done"
-    fi
-
+  if [ -f $build_dir/package.json ]; then
+    status "Using existing package.json"
+  else
+    status "Vendoring default package.json into slug..."
+    mv "$bp_dir/vendor/package.json" "$build_dir/package.json"
+    install_server_dependencies=true
   fi
 
   status "Installing Node and build dependencies..."
   NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
   git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
   chmod -f +x $NODE_BUILDPACK_DIR/bin/{detect,compile,release} || true
-  mkdir -p $cache_dir/static
   $NODE_BUILDPACK_DIR/bin/compile $build_dir $cache_dir/static
   rm -fr $NODE_BUILDPACK_DIR
 
+  if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
+    if [ -f $build_dir/server.js ]; then
+      status "Using existing server.js"
+    else
+      if [[ $install_server_dependencies ]]; then
+        # Scope config var availability only to `npm install`
+        (
+          status "Installing dependencies for $SERVER_TYPE server"
+          # Make npm output to STDOUT instead of its default STDERR
+          npm install resolve-path@1.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install mime-types@0.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install finished@1.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install cachelicious@cblage/node-cachelicious --userconfig $build_dir/.npmrc --production 2>&1 | indent
+        )
+      fi
+      status "Vendoring server.js for $SERVER_TYPE server into slug..."
+      mv "$bp_dir/vendor/server.js" "$build_dir/server.js"
+    fi
+  elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
+    if [ -f $build_dir/server.js ]; then
+      status "Using existing server.js"
+    else
+      if [[ $install_server_dependencies ]]; then
+        # Scope config var availability only to `npm install`
+        (
+          status "Installing dependencies for $SERVER_TYPE server"
+          # Make npm output to STDOUT instead of its default STDERR
+          npm install connect@2.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install express@4.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install resolve-path@1.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install serve-static@1.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install static-favicon@2.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
+          npm install cachelicious@cblage/node-cachelicious --userconfig $build_dir/.npmrc --production 2>&1 | indent
+        )
+      fi
+      status "Vendoring server.js for $SERVER_TYPE server into slug..."
+      mv "$bp_dir/vendor/express.js" "$build_dir/server.js"
+    fi
+  fi
+
 elif [[ $SERVER_TYPE == "nginx" ]]; then
 
-  # init default nginx configuration ----------
-
+  # init default nginx configuration
   if [ -d "${build_dir}/conf" ]; then
     status "Using existing nginx configuration."
   else
@@ -109,18 +118,14 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
     mkdir -p "${build_dir}/conf"
     mv "$bp_dir/vendor/mime.types" "$build_dir/conf/mime.types"
     mv "$bp_dir/vendor/nginx.conf.erb" "$build_dir/conf/nginx.conf.erb"
-    echo "done"
   fi
 
-  # Nginx -------------------------------------
-
+  # Nginx Installation
   status "Initiating Nginx Buildpack... "
   NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
   git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $NGINX_BUILDPACK_DIR
   chmod -f +x $NGINX_BUILDPACK_DIR/bin/{detect,compile,release} || true
-  mkdir -p $cache_dir/static
   $NGINX_BUILDPACK_DIR/bin/compile $build_dir $cache_dir/static
-  echo "       done."
   rm -fr $NGINX_BUILDPACK_DIR
 
 fi
