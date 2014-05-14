@@ -63,9 +63,10 @@ if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "ex
              } else {
                   print $0;
              }
-        }' package.json > tmp-package.json;
-      cp tmp-package.json package.json;
-      rm tmp-package.json;
+           }' $build_dir/package.json > $build_dir/tmp-package.json;
+      cp $build_dir/tmp-package.json $build_dir/package.json
+      rm $build_dir/tmp-package.json
+      cat $build_dir/package.json
     elif [[ $server_type == "express" || $server_type == "express.js" ]]; then
       status "Augmenting package.json with $server_type server dependencies"
       # Do this because we want to cache it with other node_modules. Otherwise it will be pruned.
@@ -102,17 +103,6 @@ if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "ex
     if [ -f $build_dir/server.js ]; then
       status "Using existing server.js"
     else
-      if [[ $install_server_dependencies ]]; then
-        # Scope config var availability only to `npm install`
-        (
-          status "Installing dependencies for $server_type server"
-          # Make npm output to STDOUT instead of its default STDERR
-          npm install resolve-path@1.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
-          npm install mime-types@0.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
-          npm install finished@1.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
-          npm install cachelicious@cblage/node-cachelicious --userconfig $build_dir/.npmrc --production 2>&1 | indent
-        )
-      fi
       status "Vendoring server.js for $server_type server into slug..."
       mv "$bp_dir/vendor/server.js" "$build_dir/server.js"
     fi
@@ -123,6 +113,12 @@ if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "ex
       status "Vendoring server.js for $server_type server into slug..."
       mv "$bp_dir/vendor/express.js" "$build_dir/server.js"
     fi
+  fi
+
+  # If Procfile is absent, try to create one using `node server`
+  if [ ! -e $build_dir/Procfile ]; then
+    status "No Procfile found; Adding `node server` to new Procfile"
+    echo "web: node server" > $build_dir/Procfile
   fi
 
 elif [[ $server_type == "nginx" ]]; then
