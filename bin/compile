@@ -75,10 +75,10 @@ if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "ex
              } else {
                   print $0;
              }
-        }' package.json > tmp-package.json;
-      cp tmp-package.json package.json;
-      rm tmp-package.json;
-      cat package.json;
+        }' $build_dir/package.json > $build_dir/tmp-package.json;
+      cp $build_dir/tmp-package.json $build_dir/package.json
+      rm $build_dir/tmp-package.json
+      cat $build_dir/package.json
     fi
   else
     if [[ $server_type == "node" || $server_type == "node.js" ]]; then
