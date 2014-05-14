@@ -117,7 +117,7 @@ if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "ex
 
   # If Procfile is absent, try to create one using `node server`
   if [ ! -e $build_dir/Procfile ]; then
-    status "No Procfile found; Adding `node server` to new Procfile"
+    status "No Procfile found; Adding 'node server' to new Procfile"
     echo "web: node server" > $build_dir/Procfile
   fi
 
