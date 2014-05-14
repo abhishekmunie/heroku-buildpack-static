@@ -36,6 +36,12 @@ if process.env['USE_CACHEBUSTING_API']
     sha1Hash.setEncoding 'hex'
     try
       rs = fs.ReadStream resolve path.resolve(STATIC_DIR), req.params[0]
+      rs.on 'error', (err) ->
+        res.format
+          'text/plain': -> res.send 'Something blew up!'; return
+          'text/html': -> res.send 'Something blew up!'; return
+          'application/json': -> res.send error: 'Something blew up!'; return
+        return
       rs.on 'end', ->
         sha1Hash.end()
         sha1 = sha1Hash.read()

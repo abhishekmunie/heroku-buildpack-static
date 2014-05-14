@@ -55,10 +55,15 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
 
   if [ -f $build_dir/package.json ]; then
     status "Using existing package.json"
-  else
-    status "Vendoring default package.json into slug..."
-    mv "$bp_dir/vendor/package.json" "$build_dir/package.json"
     install_server_dependencies=true
+  else
+    if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
+      status "Vendoring package.json for $SERVER_TYPE server into slug..."
+      mv "$bp_dir/vendor/package-node.json" "$build_dir/package.json"
+    elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
+      status "Vendoring package.json for $SERVER_TYPE server into slug..."
+      mv "$bp_dir/vendor/package-express.json" "$build_dir/package.json"
+    fi
   fi
 
   status "Installing Node and build dependencies..."

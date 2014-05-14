@@ -47,6 +47,21 @@ if (process.env['USE_CACHEBUSTING_API']) {
     sha1Hash.setEncoding('hex');
     try {
       rs = fs.ReadStream(resolve(path.resolve(STATIC_DIR), req.params[0]));
+      rs.on('error', function(err) {
+        res.format({
+          'text/plain': function() {
+            res.send('Something blew up!');
+          },
+          'text/html': function() {
+            res.send('Something blew up!');
+          },
+          'application/json': function() {
+            res.send({
+              error: 'Something blew up!'
+            });
+          }
+        });
+      });
       rs.on('end', function() {
         var sha1;
         sha1Hash.end();
