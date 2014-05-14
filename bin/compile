@@ -46,41 +46,41 @@ if [[ ! -f $build_dir/error/404.html ]]; then
 fi
 
 # Sets default server type
-if [[ ! $SERVER_TYPE ]]; then
-  SERVER_TYPE="node"
+if [[ ! $server_type ]]; then
+  server_type="node"
 fi
 
-if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
+if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "express" || $server_type == "express.js" ]]; then
 
 
   if [ -f $build_dir/package.json ]; then
     status "Using existing package.json"
     install_server_dependencies=true
   else
-    if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
-      status "Vendoring package.json for $SERVER_TYPE server into slug..."
+    if [[ $server_type == "node" || $server_type == "node.js" ]]; then
+      status "Vendoring package.json for $server_type server into slug..."
       mv "$bp_dir/vendor/package-node.json" "$build_dir/package.json"
-    elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
-      status "Vendoring package.json for $SERVER_TYPE server into slug..."
+    elif [[ $server_type == "express" || $server_type == "express.js" ]]; then
+      status "Vendoring package.json for $server_type server into slug..."
       mv "$bp_dir/vendor/package-express.json" "$build_dir/package.json"
     fi
   fi
 
   status "Installing Node and build dependencies..."
-  NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
-  git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
-  chmod -f +x $NODE_BUILDPACK_DIR/bin/{detect,compile,release} || true
-  $NODE_BUILDPACK_DIR/bin/compile $build_dir $cache_dir/static
-  rm -fr $NODE_BUILDPACK_DIR
+  node_buildpack_dir=$(mktemp -d -t node.XXXXXX)
+  git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $node_buildpack_dir
+  chmod -f +x $node_buildpack_dir/bin/{detect,compile,release} || true
+  $node_buildpack_dir/bin/compile $build_dir $cache_dir/static
+  rm -fr $node_buildpack_dir
 
-  if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" ]]; then
+  if [[ $server_type == "node" || $server_type == "node.js" ]]; then
     if [ -f $build_dir/server.js ]; then
       status "Using existing server.js"
     else
       if [[ $install_server_dependencies ]]; then
         # Scope config var availability only to `npm install`
         (
-          status "Installing dependencies for $SERVER_TYPE server"
+          status "Installing dependencies for $server_type server"
           # Make npm output to STDOUT instead of its default STDERR
           npm install resolve-path@1.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
           npm install mime-types@0.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
@@ -88,17 +88,17 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
           npm install cachelicious@cblage/node-cachelicious --userconfig $build_dir/.npmrc --production 2>&1 | indent
         )
       fi
-      status "Vendoring server.js for $SERVER_TYPE server into slug..."
+      status "Vendoring server.js for $server_type server into slug..."
       mv "$bp_dir/vendor/server.js" "$build_dir/server.js"
     fi
-  elif [[ $SERVER_TYPE == "express" || $SERVER_TYPE == "express.js" ]]; then
+  elif [[ $server_type == "express" || $server_type == "express.js" ]]; then
     if [ -f $build_dir/server.js ]; then
       status "Using existing server.js"
     else
       if [[ $install_server_dependencies ]]; then
         # Scope config var availability only to `npm install`
         (
-          status "Installing dependencies for $SERVER_TYPE server"
+          status "Installing dependencies for $server_type server"
           # Make npm output to STDOUT instead of its default STDERR
           npm install connect@2.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
           npm install express@4.x.x --userconfig $build_dir/.npmrc --production 2>&1 | indent
@@ -108,12 +108,12 @@ if [[ $SERVER_TYPE == "node" || $SERVER_TYPE == "node.js" || $SERVER_TYPE == "ex
           npm install cachelicious@cblage/node-cachelicious --userconfig $build_dir/.npmrc --production 2>&1 | indent
         )
       fi
-      status "Vendoring server.js for $SERVER_TYPE server into slug..."
+      status "Vendoring server.js for $server_type server into slug..."
       mv "$bp_dir/vendor/express.js" "$build_dir/server.js"
     fi
   fi
 
-elif [[ $SERVER_TYPE == "nginx" ]]; then
+elif [[ $server_type == "nginx" ]]; then
 
   # init default nginx configuration
   if [ -d "${build_dir}/conf" ]; then
@@ -127,10 +127,10 @@ elif [[ $SERVER_TYPE == "nginx" ]]; then
 
   # Nginx Installation
   status "Initiating Nginx Buildpack... "
-  NGINX_BUILDPACK_DIR=$(mktemp -d -t nginx.XXXXXX)
-  git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $NGINX_BUILDPACK_DIR
-  chmod -f +x $NGINX_BUILDPACK_DIR/bin/{detect,compile,release} || true
-  $NGINX_BUILDPACK_DIR/bin/compile $build_dir $cache_dir/static
-  rm -fr $NGINX_BUILDPACK_DIR
+  nginx_buildpack_dir=$(mktemp -d -t nginx.XXXXXX)
+  git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-nginx.git $nginx_buildpack_dir
+  chmod -f +x $nginx_buildpack_dir/bin/{detect,compile,release} || true
+  $nginx_buildpack_dir/bin/compile $build_dir $cache_dir/static
+  rm -fr $nginx_buildpack_dir
 
 fi
