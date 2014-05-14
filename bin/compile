@@ -59,7 +59,7 @@ if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "ex
       # Do this because we want to cache it with other node_modules. Otherwise it will be pruned.
       # It doesn't matter if grunt and/or grunt-cli is already there
       awk '{ if ( $0 ~ /"dependencies".*/ ) {
-                  printf "%s\n%s\n%s\n", $0, "\"grunt-cli\": \"*\",", "\"grunt\": \"*\",";
+                  printf "%s\n    %s\n    %s\n    %s\n    %s\n", $0, "\"resolve-path\": \"1.x.x\",", "\"mime-types\": \"0.x.x\",", "\"finished\": \"1.x.x\",", "\"cachelicious\": \"cblage/node-cachelicious\",";
              } else {
                   print $0;
              }
@@ -71,11 +71,11 @@ if [[ $server_type == "node" || $server_type == "node.js" || $server_type == "ex
       # Do this because we want to cache it with other node_modules. Otherwise it will be pruned.
       # It doesn't matter if grunt and/or grunt-cli is already there
       awk '{ if ( $0 ~ /"dependencies".*/ ) {
-                  printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\n", $0, "\"connect\": \"2.x.x\",", "\"express\": \"4.x.x\",", "\"resolve-path\": \"1.x.x\",", "\"serve-static\": \"1.x.x\",", "\"static-favicon\": \"2.x.x\",", "\"cachelicious\": \"cblage/node-cachelicious\",";
+                 printf "%s\n    %s\n    %s\n    %s\n    %s\n    %s\n    %s\n", $0, "\"connect\": \"2.x.x\",", "\"express\": \"4.x.x\",", "\"resolve-path\": \"1.x.x\",", "\"serve-static\": \"1.x.x\",", "\"static-favicon\": \"2.x.x\",", "\"cachelicious\": \"cblage/node-cachelicious\",";
              } else {
-                  print $0;
+                 print $0;
              }
-        }' $build_dir/package.json > $build_dir/tmp-package.json;
+           }' $build_dir/package.json > $build_dir/tmp-package.json;
       cp $build_dir/tmp-package.json $build_dir/package.json
       rm $build_dir/tmp-package.json
       cat $build_dir/package.json
